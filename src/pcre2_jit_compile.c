@@ -4202,9 +4202,6 @@ TMP2 is not used. Otherwise TMP2 must contain the start of the subject buffer,
 and it is destroyed. Does not modify STR_PTR for invalid character sequences. */
 DEFINE_COMPILER;
 
-SLJIT_UNUSED_ARG(backtracks);
-SLJIT_UNUSED_ARG(must_be_valid);
-
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
 struct sljit_jump *jump;
 #endif
@@ -4278,6 +4275,10 @@ if (common->invalid_utf && !must_be_valid)
   }
 #endif /* PCRE2_CODE_UNIT_WIDTH == [8|16|32] */
 #endif /* SUPPORT_UNICODE */
+
+SLJIT_UNUSED_ARG(backtracks);
+SLJIT_UNUSED_ARG(must_be_valid);
+
 OP2(SLJIT_SUB, STR_PTR, 0, STR_PTR, 0, SLJIT_IMM, IN_UCHARS(1));
 }
 
@@ -14132,6 +14133,11 @@ pcre2_jit_compile(pcre2_code *code, uint32_t options)
 {
 pcre2_real_code *re = (pcre2_real_code *)code;
 
+#ifdef SUPPORT_JIT
+executable_functions *functions = (executable_functions *)re->executable_jit;
+static int executable_allocator_is_working = 0;
+#endif
+
 if (code == NULL)
   return PCRE2_ERROR_NULL;
 
@@ -14163,11 +14169,6 @@ actions are needed:
      done, (void)re and (void)functions will be needed in the non-JIT case, to
      avoid compiler warnings.
 */
-
-#ifdef SUPPORT_JIT
-executable_functions *functions = (executable_functions *)re->executable_jit;
-static int executable_allocator_is_working = 0;
-#endif
 
 if ((options & PCRE2_JIT_INVALID_UTF) != 0)
   {

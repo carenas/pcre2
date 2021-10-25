@@ -391,7 +391,7 @@ enum { OP_NODATA, OP_STRING, OP_OP_STRING, OP_NUMBER, OP_U32NUMBER, OP_SIZE,
 typedef struct option_item {
   int type;
   int one_char;
-  void *dataptr;
+  const void *dataptr;
   const char *long_name;
   const char *help_text;
 } option_item;
