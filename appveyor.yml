@@ -15,11 +15,11 @@ nuget:
 before_build:
   - cmd: |
       cd C:\projects\pcre2
-      cmake -G"Visual Studio 9 2008" -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DBUILD_SHARED_LIBS=ON
+      cmake -G"Visual Studio 10 2010" -DPCRE2_SUPPORT_JIT=ON -DPCRE2_BUILD_PCRE2_16=ON -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_DEBUG=ON -DBUILD_SHARED_LIBS=ON
 build_script:
   - cmake --build .
 test_script:
   - cmd: |
-      RunTest.bat
+      msbuild RUN_TESTS.vcxproj
       cd Debug
       pcre2test.exe -C
