@@ -2537,6 +2537,7 @@ BOOL binary = FALSE;
 BOOL endhyphenpending = FALSE;
 BOOL lines_printed = FALSE;
 BOOL input_line_buffered = line_buffered;
+long stream_start = 0;
 FILE *in = NULL;                    /* Ensure initialized */
 
 /* Do the first read into the start of the buffer and set up the pointer to end
@@ -2547,6 +2548,9 @@ fail. */
 if (frtype != FR_LIBZ && frtype != FR_LIBBZ2)
   {
   in = (FILE *)handle;
+  if (feof(in))
+    return 1;
+  stream_start = ftell(in);
   if (is_file_tty(in)) input_line_buffered = TRUE;
   }
 else input_line_buffered = FALSE;
@@ -2595,7 +2599,7 @@ while (ptr < endptr)
   if (count_limit >= 0 && count_matched_lines >= count_limit)
     {
     if (frtype == FR_PLAIN && filename == stdin_name && !is_file_tty(handle))
-      (void)fseek(handle, (long int)filepos, SEEK_SET);
+      (void)fseek(handle, stream_start + (long int)filepos, SEEK_SET);
     rc = (count_limit == 0)? 1 : 0;
     break;
     }
