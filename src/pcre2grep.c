@@ -2599,7 +2599,10 @@ while (ptr < endptr)
   if (count_limit >= 0 && count_matched_lines >= count_limit)
     {
     if (frtype == FR_PLAIN && filename == stdin_name && !is_file_tty(handle))
-      (void)fseek(handle, stream_start + (long int)filepos, SEEK_SET);
+      {
+        off_t o = stream_start + (long int)filepos;
+        lseek(0, o, SEEK_SET);
+      }
     rc = (count_limit == 0)? 1 : 0;
     break;
     }
