@@ -359,6 +359,7 @@ modes, so use the form of the first that is available. */
 #define DEFAULT_TEST_MODE PCRE8_MODE
 #define VERSION_TYPE PCRE2_UCHAR8
 #define PCRE2_CONFIG pcre2_config_8
+#define PCRE2_SLJIT_DISABLED pcre2_sljit_disabled_8
 #define PCRE2_JIT_STACK pcre2_jit_stack_8
 #define PCRE2_REAL_GENERAL_CONTEXT pcre2_real_general_context_8
 #define PCRE2_REAL_COMPILE_CONTEXT pcre2_real_compile_context_8
@@ -369,6 +370,7 @@ modes, so use the form of the first that is available. */
 #define DEFAULT_TEST_MODE PCRE16_MODE
 #define VERSION_TYPE PCRE2_UCHAR16
 #define PCRE2_CONFIG pcre2_config_16
+#define PCRE2_SLJIT_DISABLED pcre2_sljit_disabled_16
 #define PCRE2_JIT_STACK pcre2_jit_stack_16
 #define PCRE2_REAL_GENERAL_CONTEXT pcre2_real_general_context_16
 #define PCRE2_REAL_COMPILE_CONTEXT pcre2_real_compile_context_16
@@ -379,6 +381,7 @@ modes, so use the form of the first that is available. */
 #define DEFAULT_TEST_MODE PCRE32_MODE
 #define VERSION_TYPE PCRE2_UCHAR32
 #define PCRE2_CONFIG pcre2_config_32
+#define PCRE2_SLJIT_DISABLED pcre2_sljit_disabled_32
 #define PCRE2_JIT_STACK pcre2_jit_stack_32
 #define PCRE2_REAL_GENERAL_CONTEXT pcre2_real_general_context_32
 #define PCRE2_REAL_COMPILE_CONTEXT pcre2_real_compile_context_32
@@ -8401,7 +8404,10 @@ if (optval != 0)
   }
 else
   {
-  printf("  No just-in-time compiler support\n");
+  printf("  No just-in-time compiler support");
+  if (PCRE2_SLJIT_DISABLED() != PCRE2_ERROR_JIT_BADOPTION)
+    printf(" (runtime)");
+  printf("\n");
   }
 
 (void)PCRE2_CONFIG(PCRE2_CONFIG_NEWLINE, &optval);
@@ -8883,6 +8889,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
 #ifdef SUPPORT_PCRE2_16
     test_mode = PCRE16_MODE;
     (void)pcre2_config_16(PCRE2_CONFIG_VERSION, NULL);
+    (void)pcre2_sljit_disabled_16();
     (void)pcre2_set_bsr_16(pat_context16, 999);
     (void)pcre2_set_newline_16(pat_context16, 999);
 #else
@@ -8897,6 +8904,7 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
 #ifdef SUPPORT_PCRE2_32
     test_mode = PCRE32_MODE;
     (void)pcre2_config_32(PCRE2_CONFIG_VERSION, NULL);
+    (void)pcre2_sljit_disabled_32();
     (void)pcre2_set_bsr_32(pat_context32, 999);
     (void)pcre2_set_newline_32(pat_context32, 999);
 #else

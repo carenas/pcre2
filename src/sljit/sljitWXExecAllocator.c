@@ -51,6 +51,10 @@
    not possible.
 */
 
+#ifndef sljit_wx_unlocked
+#define sljit_wx_unlocked(a) (1)
+#endif
+
 #define SLJIT_UPDATE_WX_FLAGS(from, to, enable_exec) \
 	sljit_update_wx_flags((from), (to), (enable_exec))
 

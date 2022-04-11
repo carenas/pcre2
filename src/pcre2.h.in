@@ -566,7 +566,8 @@ expanded for each width below. Start with functions that give general
 information. */
 
 #define PCRE2_GENERAL_INFO_FUNCTIONS \
-PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION pcre2_config(uint32_t, void *);
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION pcre2_config(uint32_t, void *); \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION pcre2_sljit_disabled(void);
 
 
 /* Functions for manipulating contexts. */
@@ -841,6 +842,7 @@ pcre2_compile are called by application code. */
 #define pcre2_compile_context_create          PCRE2_SUFFIX(pcre2_compile_context_create_)
 #define pcre2_compile_context_free            PCRE2_SUFFIX(pcre2_compile_context_free_)
 #define pcre2_config                          PCRE2_SUFFIX(pcre2_config_)
+#define pcre2_sljit_disabled                  PCRE2_SUFFIX(pcre2_sljit_disabled_)
 #define pcre2_convert_context_copy            PCRE2_SUFFIX(pcre2_convert_context_copy_)
 #define pcre2_convert_context_create          PCRE2_SUFFIX(pcre2_convert_context_create_)
 #define pcre2_convert_context_free            PCRE2_SUFFIX(pcre2_convert_context_free_)

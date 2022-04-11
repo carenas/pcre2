@@ -14358,6 +14358,20 @@ return 0;
 
 #endif
 
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_sljit_disabled(void)
+{
+#ifdef SUPPORT_JIT
+static int executable_allocator_is_working = -1;
+if (executable_allocator_is_working < 0)
+  executable_allocator_is_working = sljit_wx_unlocked(1);
+
+return !executable_allocator_is_working;
+#else
+return PCRE2_ERROR_JIT_BADOPTION;
+#endif
+}
+
 /*************************************************
 *        JIT compile a Regular Expression        *
 *************************************************/
@@ -14382,7 +14396,6 @@ pcre2_jit_compile(pcre2_code *code, uint32_t options)
 pcre2_real_code *re = (pcre2_real_code *)code;
 #ifdef SUPPORT_JIT
 executable_functions *functions;
-static int executable_allocator_is_working = 0;
 #endif
 
 if (code == NULL)
@@ -14445,23 +14458,7 @@ return PCRE2_ERROR_JIT_BADOPTION;
 
 if ((re->flags & PCRE2_NOJIT) != 0) return 0;
 
-if (executable_allocator_is_working == 0)
-  {
-  /* Checks whether the executable allocator is working. This check
-     might run multiple times in multi-threaded environments, but the
-     result should not be affected by it. */
-  void *ptr = SLJIT_MALLOC_EXEC(32, NULL);
-
-  executable_allocator_is_working = -1;
-
-  if (ptr != NULL)
-    {
-    SLJIT_FREE_EXEC(((sljit_u8*)(ptr)) + SLJIT_EXEC_OFFSET(ptr), NULL);
-    executable_allocator_is_working = 1;
-    }
-  }
-
-if (executable_allocator_is_working < 0)
+if (pcre2_sljit_disabled())
   return PCRE2_ERROR_NOMEMORY;
 
 if ((re->overall_options & PCRE2_MATCH_INVALID_UTF) != 0)

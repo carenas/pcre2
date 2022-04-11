@@ -145,7 +145,10 @@ switch (what)
 
   case PCRE2_CONFIG_JIT:
 #ifdef SUPPORT_JIT
-  *((uint32_t *)where) = 1;
+    {
+    int v = pcre2_sljit_disabled();
+    *((uint32_t *)where) = (v == 0) ? 1 : 0;
+    }
 #else
   *((uint32_t *)where) = 0;
 #endif
