@@ -59,7 +59,9 @@ they are set for an application (using these functions) if they have not
 previously been set. */
 
 #if defined(_WIN32) && !defined(PCRE2_STATIC)
+#  undef PCRE2POSIX_EXP_DECL
 #  define PCRE2POSIX_EXP_DECL extern __declspec(dllexport)
+#  undef PCRE2POSIX_EXP_DEFN
 #  define PCRE2POSIX_EXP_DEFN __declspec(dllexport)
 #endif
 
