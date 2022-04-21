@@ -135,9 +135,9 @@ if "%all%" == "yes" (
   set do7=yes
   set do8=yes
   set do9=yes
-  set do10=no
+  set do10=yes
   set do11=yes
-  set do12=no
+  set do12=yes
   set do13=yes
   set do14=yes
   set do15=yes
@@ -281,22 +281,26 @@ if [%1]==[22] (
   set type=-%bits%
 )
 
-fc /n %srcdir%\testdata\%testoutput%%type% %2%bits%\%testoutput% >NUL
+set out=NUL
+if exist test-output set out=test-output\%1-%bits%.txt
+
+fc /n %srcdir%\testdata\%testoutput%%type% %2%bits%\%testoutput% >%out%
 
 if errorlevel 1 (
-  echo.          failed comparison: fc /n %srcdir%\testdata\%testoutput% %2%bits%\%testoutput%
+  echo.          failed comparison: fc /n %srcdir%\testdata\%testoutput%%type% %2%bits%\%testoutput%
   if [%1]==[3] (
     echo.
     echo ** Test 3 failure usually means french locale is not
     echo ** available on the system, rather than a bug or problem with PCRE2.
     echo.
     goto :eof
-)
+  )
 
   set failed="yes"
   goto :eof
 )
 
+if NOT [%out%]==[NUL] del %out%
 echo.          Passed.
 goto :eof
 
