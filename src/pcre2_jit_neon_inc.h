@@ -104,8 +104,8 @@ vect_t vmask = VDUPQ(mask);
 #endif
 
 #if defined(FFCPS)
-compare_type compare1_type = compare_match1;
-compare_type compare2_type = compare_match1;
+vector_compare_type compare1_type = vector_compare_match1;
+vector_compare_type compare2_type = vector_compare_match1;
 vect_t cmp1a, cmp1b, cmp2a, cmp2b;
 const sljit_u32 diff = IN_UCHARS(offs1 - offs2);
 PCRE2_UCHAR char1a = c1;
@@ -129,13 +129,13 @@ else
   sljit_u32 bit1 = char1a ^ char1b;
   if (is_powerof2(bit1))
     {
-    compare1_type = compare_match1i;
+    compare1_type = vector_compare_match1i;
     cmp1a = VDUPQ(char1a | bit1);
     cmp1b = VDUPQ(bit1);
     }
   else
     {
-    compare1_type = compare_match2;
+    compare1_type = vector_compare_match2;
     cmp1a = VDUPQ(char1a);
     cmp1b = VDUPQ(char1b);
     }
@@ -151,13 +151,13 @@ else
   sljit_u32 bit2 = char2a ^ char2b;
   if (is_powerof2(bit2))
     {
-    compare2_type = compare_match1i;
+    compare2_type = vector_compare_match1i;
     cmp2a = VDUPQ(char2a | bit2);
     cmp2b = VDUPQ(bit2);
     }
   else
     {
-    compare2_type = compare_match2;
+    compare2_type = vector_compare_match2;
     cmp2a = VDUPQ(char2a);
     cmp2b = VDUPQ(char2b);
     }
@@ -182,8 +182,8 @@ if (str_ptr >= str_end)
   return NULL;
 sljit_u8 *p1 = str_ptr - diff;
 #endif
-sljit_s32 align_offset = ((uint64_t)str_ptr & 0xf);
-str_ptr = (sljit_u8 *) ((uint64_t)str_ptr & ~0xf);
+sljit_s32 align_offset = ((sljit_uw)str_ptr & 0xf);
+str_ptr = (sljit_u8 *)((sljit_uw)str_ptr & ~0xf);
 vect_t data = VLD1Q(str_ptr);
 #if PCRE2_CODE_UNIT_WIDTH != 8
 data = VANDQ(data, char_mask);
@@ -217,12 +217,12 @@ if (p1 < str_ptr)
 else
   data2 = shift_left_n_lanes(data, offs1 - offs2);
  
-if (compare1_type == compare_match1)
+if (compare1_type == vector_compare_match1)
   data = VCEQQ(data, cmp1a);
 else
   data = fast_forward_char_pair_compare(compare1_type, data, cmp1a, cmp1b);
 
-if (compare2_type == compare_match1)
+if (compare2_type == vector_compare_match1)
   data2 = VCEQQ(data2, cmp2a);
 else
   data2 = fast_forward_char_pair_compare(compare2_type, data2, cmp2a, cmp2b);
@@ -292,11 +292,11 @@ while (str_ptr < str_end)
   data = VCEQQ(data, cmp1a);
   data2 = VCEQQ(data2, cmp2a);
 # else
-  if (compare1_type == compare_match1)
+  if (compare1_type == vector_compare_match1)
     data = VCEQQ(data, cmp1a);
   else
     data = fast_forward_char_pair_compare(compare1_type, data, cmp1a, cmp1b);
-  if (compare2_type == compare_match1)
+  if (compare2_type == vector_compare_match1)
     data2 = VCEQQ(data2, cmp2a);
   else
     data2 = fast_forward_char_pair_compare(compare2_type, data2, cmp2a, cmp2b);

@@ -42,7 +42,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #if !(defined SUPPORT_VALGRIND)
 
 #if ((defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) \
-     || (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X))
+     || (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X) \
+     || (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64))
 
 typedef enum {
   vector_compare_match1,
@@ -63,7 +64,8 @@ return 3;
 #endif
 }
 
-#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
+#if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32 \
+	&& !(defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64)
 static struct sljit_jump *jump_if_utf_char_start(struct sljit_compiler *compiler, sljit_s32 reg)
 {
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -933,22 +935,15 @@ partial_quit = CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
 if (common->mode == PCRE2_JIT_COMPLETE)
   add_jump(compiler, &common->failed_match, partial_quit);
 
-/* Fast forward STR_PTR to the result of memchr. */
 OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
 
 if (common->mode != PCRE2_JIT_COMPLETE)
   JUMPHERE(partial_quit);
 }
 
-typedef enum {
-  compare_match1,
-  compare_match1i,
-  compare_match2,
-} compare_type;
-
-static inline vect_t fast_forward_char_pair_compare(compare_type ctype, vect_t dst, vect_t cmp1, vect_t cmp2)
+static inline vect_t fast_forward_char_pair_compare(vector_compare_type ctype, vect_t dst, vect_t cmp1, vect_t cmp2)
 {
-if (ctype == compare_match2)
+if (ctype == vector_compare_match2)
   {
   vect_t tmp = dst;
   dst = VCEQQ(dst, cmp1);
@@ -957,23 +952,10 @@ if (ctype == compare_match2)
   return dst;
   }
 
-if (ctype == compare_match1i)
+if (ctype == vector_compare_match1i)
   dst = VORRQ(dst, cmp2);
 dst = VCEQQ(dst, cmp1);
 return dst;
-}
-
-static SLJIT_INLINE sljit_u32 max_fast_forward_char_pair_offset(void)
-{
-#if PCRE2_CODE_UNIT_WIDTH == 8
-return 15;
-#elif PCRE2_CODE_UNIT_WIDTH == 16
-return 7;
-#elif PCRE2_CODE_UNIT_WIDTH == 32
-return 3;
-#else
-#error "Unsupported unit width"
-#endif
 }
 
 /* ARM doesn't have a shift left across lanes. */
@@ -1107,13 +1089,12 @@ OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_MEM1(SLJIT_SP), LOCALS0);
 partial_quit = CMP(SLJIT_EQUAL, SLJIT_RETURN_REG, 0, SLJIT_IMM, 0);
 add_jump(compiler, &common->failed_match, partial_quit);
 
-/* Fast forward STR_PTR to the result of memchr. */
 OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
 
 JUMPHERE(partial_quit);
 }
 
-#endif /* SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64 */
+#endif /* SLJIT_CONFIG_ARM_64 */
 
 #if (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X)
 
