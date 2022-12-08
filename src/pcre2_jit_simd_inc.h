@@ -43,7 +43,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #if ((defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) \
      || (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X) \
-     || (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64))
+     || (defined SLJIT_CONFIG_ARM && SLJIT_CONFIG_ARM))
 
 typedef enum {
   vector_compare_match1,
@@ -65,7 +65,7 @@ return 3;
 }
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32 \
-	&& !(defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64)
+	&& !(defined SLJIT_CONFIG_ARM && SLJIT_CONFIG_ARM)
 static struct sljit_jump *jump_if_utf_char_start(struct sljit_compiler *compiler, sljit_s32 reg)
 {
 #if PCRE2_CODE_UNIT_WIDTH == 8
@@ -768,7 +768,7 @@ if (common->match_end_ptr != 0)
 
 #endif /* SLJIT_CONFIG_X86 */
 
-#if (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64 && (defined __ARM_NEON || defined __ARM_NEON__))
+#if defined(SLJIT_CONFIG_ARM) && SLJIT_CONFIG_ARM
 
 #include <arm_neon.h>
 
@@ -856,7 +856,11 @@ typedef union {
 #endif
 #undef FFCS_MASK
 
+#ifdef SLJIT_CONFIG_ARM_64
 #define JIT_HAS_FAST_FORWARD_CHAR_SIMD 1
+#else
+#define JIT_HAS_FAST_FORWARD_CHAR_SIMD (sljit_has_cpu_feature(SLJIT_HAS_NEON))
+#endif
 
 static void fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2, sljit_s32 offset)
 {
@@ -1016,7 +1020,11 @@ switch (n)
 #endif
 #undef FFCPS
 
+#ifdef SLJIT_CONFIG_ARM_64
 #define JIT_HAS_FAST_FORWARD_CHAR_PAIR_SIMD 1
+#else
+#define JIT_HAS_FAST_FORWARD_CHAR_PAIR_SIMD (sljit_has_cpu_feature(SLJIT_HAS_NEON))
+#endif
 
 static void fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1,
   PCRE2_UCHAR char1a, PCRE2_UCHAR char1b, sljit_s32 offs2, PCRE2_UCHAR char2a, PCRE2_UCHAR char2b)
@@ -1094,7 +1102,7 @@ OP1(SLJIT_MOV, STR_PTR, 0, SLJIT_RETURN_REG, 0);
 JUMPHERE(partial_quit);
 }
 
-#endif /* SLJIT_CONFIG_ARM_64 */
+#endif /* SLJIT_CONFIG_ARM */
 
 #if (defined SLJIT_CONFIG_S390X && SLJIT_CONFIG_S390X)
 
