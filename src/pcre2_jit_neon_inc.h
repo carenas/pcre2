@@ -82,31 +82,24 @@ POSSIBILITY OF SUCH DAMAGE.
 #  endif
 # endif
 
-static sljit_u8* SLJIT_FUNC FF_FUN(sljit_u8 *str_end, sljit_u8 *str_ptr, sljit_uw offs1, sljit_uw offs2, sljit_uw chars)
+static sljit_u8* SLJIT_FUNC FF_FUN(sljit_u8 *str_end, sljit_u8 *str_ptr, sljit_uw offs1, sljit_uw offs2, PCRE2_UCHAR c1, PCRE2_UCHAR c2, PCRE2_UCHAR c3, PCRE2_UCHAR c4)
 #undef FF_FUN
 {
 quad_word qw;
-int_char ic;
 
 SLJIT_UNUSED_ARG(offs1);
 SLJIT_UNUSED_ARG(offs2);
 
-ic.x = chars;
-
 #if defined(FFCS)
-sljit_u8 c1 = ic.c.c1;
 vect_t vc1 = VDUPQ(c1);
 
 #elif defined(FFCS_2)
-sljit_u8 c1 = ic.c.c1;
 vect_t vc1 = VDUPQ(c1);
-sljit_u8 c2 = ic.c.c2;
 vect_t vc2 = VDUPQ(c2);
 
 #elif defined(FFCS_MASK)
-sljit_u8 c1 = ic.c.c1;
 vect_t vc1 = VDUPQ(c1);
-sljit_u8 mask = ic.c.c2;
+sljit_u8 mask = c2;
 vect_t vmask = VDUPQ(mask);
 #endif
 
@@ -115,8 +108,8 @@ compare_type compare1_type = compare_match1;
 compare_type compare2_type = compare_match1;
 vect_t cmp1a, cmp1b, cmp2a, cmp2b;
 const sljit_u32 diff = IN_UCHARS(offs1 - offs2);
-PCRE2_UCHAR char1a = ic.c.c1;
-PCRE2_UCHAR char2a = ic.c.c3;
+PCRE2_UCHAR char1a = c1;
+PCRE2_UCHAR char2a = c3;
 
 # ifdef FFCPS_CHAR1A2A
 cmp1a = VDUPQ(char1a);
@@ -124,8 +117,8 @@ cmp2a = VDUPQ(char2a);
 cmp1b = VDUPQ(0); /* to avoid errors on older compilers -Werror=maybe-uninitialized */
 cmp2b = VDUPQ(0); /* to avoid errors on older compilers -Werror=maybe-uninitialized */
 # else
-PCRE2_UCHAR char1b = ic.c.c2;
-PCRE2_UCHAR char2b = ic.c.c4;
+PCRE2_UCHAR char1b = c2;
+PCRE2_UCHAR char2b = c4;
 if (char1a == char1b)
   {
   cmp1a = VDUPQ(char1a);
@@ -174,8 +167,10 @@ else
 str_ptr += IN_UCHARS(offs1);
 #endif
 
-#if PCRE2_CODE_UNIT_WIDTH != 8
-vect_t char_mask = VDUPQ(0xff);
+#if PCRE2_CODE_UNIT_WIDTH == 16
+vect_t char_mask = VDUPQ(0xffff);
+#elif PCRE2_CODE_UNIT_WIDTH == 32
+vect_t char_mask = VDUPQ(0xffffffff);
 #endif
 
 #if defined(FF_UTF)

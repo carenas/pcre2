@@ -770,11 +770,6 @@ if (common->match_end_ptr != 0)
 
 #include <arm_neon.h>
 
-typedef union {
-  unsigned int x;
-  struct { unsigned char c1, c2, c3, c4; } c;
-} int_char;
-
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
 static SLJIT_INLINE int utf_continue(PCRE2_SPTR s)
 {
@@ -864,7 +859,6 @@ typedef union {
 static void fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2, sljit_s32 offset)
 {
 DEFINE_COMPILER;
-int_char ic;
 struct sljit_jump *partial_quit;
 /* Save temporary registers. */
 OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCALS0, STR_PTR, 0);
@@ -877,9 +871,8 @@ OP1(SLJIT_MOV, SLJIT_R2, 0, SLJIT_IMM, offset);
 
 if (char1 == char2)
   {
-    ic.c.c1 = char1;
-    ic.c.c2 = char2;
-    OP1(SLJIT_MOV, SLJIT_R4, 0, SLJIT_IMM, ic.x);
+    OP1(SLJIT_MOV_U32, SLJIT_R4, 0, SLJIT_IMM, char1);
+    OP1(SLJIT_MOV_U32, SLJIT_R5, 0, SLJIT_IMM, char2);
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
   if (common->utf && offset > 0)
@@ -898,37 +891,35 @@ else
   PCRE2_UCHAR mask = char1 ^ char2;
   if (is_powerof2(mask))
     {
-    ic.c.c1 = char1 | mask;
-    ic.c.c2 = mask;
-    OP1(SLJIT_MOV, SLJIT_R4, 0, SLJIT_IMM, ic.x);
+    OP1(SLJIT_MOV_U32, SLJIT_R4, 0, SLJIT_IMM, char1 | mask);
+    OP1(SLJIT_MOV_U32, SLJIT_R5, 0, SLJIT_IMM, mask);
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
     if (common->utf && offset > 0)
-      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS0(P),
                        SLJIT_IMM, SLJIT_FUNC_ADDR(ffcs_mask_utf));
     else
-      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS0(P),
                        SLJIT_IMM, SLJIT_FUNC_ADDR(ffcs_mask));
 #else
-    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS0(P),
                      SLJIT_IMM, SLJIT_FUNC_ADDR(ffcs_mask));
 #endif
     }
   else
     {
-      ic.c.c1 = char1;
-      ic.c.c2 = char2;
-      OP1(SLJIT_MOV, SLJIT_R4, 0, SLJIT_IMM, ic.x);
+      OP1(SLJIT_MOV_U32, SLJIT_R4, 0, SLJIT_IMM, char1);
+      OP1(SLJIT_MOV_U32, SLJIT_R5, 0, SLJIT_IMM, char2);
 
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
     if (common->utf && offset > 0)
-      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS0(P),
                        SLJIT_IMM, SLJIT_FUNC_ADDR(ffcs_2_utf));
     else
-      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS0(P),
                        SLJIT_IMM, SLJIT_FUNC_ADDR(ffcs_2));
 #else
-    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS0(P),
                      SLJIT_IMM, SLJIT_FUNC_ADDR(ffcs_2));
 #endif
     }
@@ -1051,7 +1042,6 @@ static void fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1
 DEFINE_COMPILER;
 sljit_u32 diff = IN_UCHARS(offs1 - offs2);
 struct sljit_jump *partial_quit;
-int_char ic;
 SLJIT_ASSERT(common->mode == PCRE2_JIT_COMPLETE && offs1 > offs2);
 SLJIT_ASSERT(diff <= IN_UCHARS(max_fast_forward_char_pair_offset()));
 SLJIT_ASSERT(compiler->scratches == 5);
@@ -1074,40 +1064,39 @@ else
 OP1(SLJIT_MOV, SLJIT_R1, 0, STR_PTR, 0); 
 OP1(SLJIT_MOV_S32, SLJIT_R2, 0, SLJIT_IMM, offs1);
 OP1(SLJIT_MOV_S32, SLJIT_R3, 0, SLJIT_IMM, offs2);
-ic.c.c1 = char1a;
-ic.c.c2 = char1b;
-ic.c.c3 = char2a;
-ic.c.c4 = char2b;
-OP1(SLJIT_MOV_U32, SLJIT_R4, 0, SLJIT_IMM, ic.x);
+OP1(SLJIT_MOV_U32, SLJIT_R4, 0, SLJIT_IMM, char1a);
+OP1(SLJIT_MOV_U32, SLJIT_R5, 0, SLJIT_IMM, char1b);
+OP1(SLJIT_MOV_U32, SLJIT_R6, 0, SLJIT_IMM, char2a);
+OP1(SLJIT_MOV_U32, SLJIT_R7, 0, SLJIT_IMM, char2b);
 
-if (diff == 1) {
+if (diff == IN_UCHARS(1)) {
   if (char1a == char1b && char2a == char2b) {
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
     if (common->utf)
-      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS0(P),
                        SLJIT_IMM, SLJIT_FUNC_ADDR(ffcps_0_utf));
     else
 #endif
-      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS0(P),
                        SLJIT_IMM, SLJIT_FUNC_ADDR(ffcps_0));
   } else {
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
     if (common->utf)
-      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS0(P),
                        SLJIT_IMM, SLJIT_FUNC_ADDR(ffcps_1_utf));
     else
 #endif
-      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+      sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS0(P),
                        SLJIT_IMM, SLJIT_FUNC_ADDR(ffcps_1));
   }
 } else {
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
   if (common->utf)
-    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS0(P),
                      SLJIT_IMM, SLJIT_FUNC_ADDR(ffcps_default_utf));
   else
 #endif
-    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS4(W, W, W, W, W),
+    sljit_emit_icall(compiler, SLJIT_CALL, SLJIT_ARGS0(P),
                      SLJIT_IMM, SLJIT_FUNC_ADDR(ffcps_default));
 }
 
