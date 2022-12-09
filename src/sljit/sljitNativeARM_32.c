@@ -41,6 +41,21 @@ SLJIT_API_FUNC_ATTRIBUTE const char* sljit_get_platform_name(void)
 #endif
 }
 
+#if (defined SLJIT_DETECT_NEON && SLJIT_DETECT_NEON)
+#define CPU_FEATURE_NEON	(1UL << 12)
+
+#include <sys/auxv.h>
+
+static unsigned long cpu_feature_list;
+
+static void get_cpu_features(void)
+{
+	if (!cpu_feature_list)
+		cpu_feature_list = getauxval(AT_HWCAP);
+}
+
+#endif /* SLJIT_DETECT_NEON */
+
 /* Last register + 1. */
 #define TMP_REG1	(SLJIT_NUMBER_OF_REGISTERS + 2)
 #define TMP_REG2	(SLJIT_NUMBER_OF_REGISTERS + 3)
@@ -973,6 +988,14 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type)
 		return 2;
 #endif
 
+	case SLJIT_HAS_NEON:
+#if (defined SLJIT_CONFIG_ARM_V7 && SLJIT_CONFIG_ARM_V7) && \
+      (defined SLJIT_DETECT_NEON && SLJIT_DETECT_NEON)
+		if (!cpu_feature_list)
+			get_cpu_features();
+		return (cpu_feature_list & CPU_FEATURE_NEON) != 0;
+#endif /* SLJIT_DETECT_NEON */
+		/* fallback */
 	default:
 		return 0;
 	}

@@ -640,6 +640,11 @@ static SLJIT_INLINE sljit_uw sljit_get_generated_code_size(struct sljit_compiler
 #define SLJIT_HAS_SSE2			100
 #endif
 
+#if (defined SLJIT_CONFIG_ARM && SLJIT_CONFIG_ARM)
+/* [Not emulated] NEON support is available on ARM. */
+#define SLJIT_HAS_NEON			100
+#endif
+
 SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_has_cpu_feature(sljit_s32 feature_type);
 
 /* If type is between SLJIT_ORDERED_EQUAL and SLJIT_ORDERED_LESS_EQUAL,
