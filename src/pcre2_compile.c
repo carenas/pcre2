@@ -7112,16 +7112,18 @@ for (;; pptr++)
 
         /* In the pre-compile phase, we don't actually do the replication. We
         just adjust the length as if we had. Do some paranoid checks for
-        potential integer overflow. The INT64_OR_DOUBLE type is a 64-bit
-        integer type when available, otherwise double. */
+        potential integer overflow. */
 
         if (lengthptr != NULL)
           {
-          PCRE2_SIZE delta = replicate*(1 + LINK_SIZE);
-          if ((INT64_OR_DOUBLE)replicate*
-                (INT64_OR_DOUBLE)(1 + LINK_SIZE) >
-                  (INT64_OR_DOUBLE)INT_MAX ||
-              OFLOW_MAX - *lengthptr < delta)
+          PCRE2_SIZE delta;
+          if (replicate > INT_MAX / (1 + LINK_SIZE))
+            {
+            *errorcodeptr = ERR20;
+            return 0;
+            }
+          delta = replicate*(1 + LINK_SIZE);
+          if (OFLOW_MAX - *lengthptr < delta)
             {
             *errorcodeptr = ERR20;
             return 0;
@@ -7287,11 +7289,16 @@ for (;; pptr++)
 
             if (lengthptr != NULL)
               {
-              PCRE2_SIZE delta = (repeat_min - 1)*length_prevgroup;
+              PCRE2_SIZE delta;
               if ((INT64_OR_DOUBLE)(repeat_min - 1)*
                     (INT64_OR_DOUBLE)length_prevgroup >
-                      (INT64_OR_DOUBLE)INT_MAX ||
-                  OFLOW_MAX - *lengthptr < delta)
+                      (INT64_OR_DOUBLE)INT_MAX)
+                {
+                *errorcodeptr = ERR20;
+                return 0;
+                }
+              delta = (repeat_min - 1)*length_prevgroup;
+              if (OFLOW_MAX - *lengthptr < delta)
                 {
                 *errorcodeptr = ERR20;
                 return 0;
@@ -7339,12 +7346,17 @@ for (;; pptr++)
 
           if (lengthptr != NULL && repeat_max > 0)
             {
-            PCRE2_SIZE delta = repeat_max*(length_prevgroup + 1 + 2 + 2*LINK_SIZE) -
-                        2 - 2*LINK_SIZE;   /* Last one doesn't nest */
+            PCRE2_SIZE delta;
             if ((INT64_OR_DOUBLE)repeat_max *
                   (INT64_OR_DOUBLE)(length_prevgroup + 1 + 2 + 2*LINK_SIZE)
-                    > (INT64_OR_DOUBLE)INT_MAX ||
-                OFLOW_MAX - *lengthptr < delta)
+                    > (INT64_OR_DOUBLE)INT_MAX)
+              {
+              *errorcodeptr = ERR20;
+              return 0;
+              }
+            delta = repeat_max*(length_prevgroup + 1 + 2 + 2*LINK_SIZE) -
+                        2 - 2*LINK_SIZE;   /* Last one doesn't nest */
+            if (OFLOW_MAX - *lengthptr < delta)
               {
               *errorcodeptr = ERR20;
               return 0;
