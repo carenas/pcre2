@@ -9998,7 +9998,15 @@ if ((options & PCRE2_LITERAL) == 0)
             ptr += pp;
             goto HAD_EARLY_ERROR;
             }
-          if (p->type == PSO_LIMH) limit_heap = c;
+          if (p->type == PSO_LIMH)
+            {
+            if (PCRE2_SIZE_MAX == UINT32_MAX && c > PCRE2_SIZE_MAX / 1024)
+              {
+              errorcode = ERR60;
+              goto HAD_EARLY_ERROR;
+              }
+            limit_heap = c;
+            }
             else if (p->type == PSO_LIMM) limit_match = c;
             else limit_depth = c;
           skipatstart += pp - skipatstart;

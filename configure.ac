@@ -323,8 +323,8 @@ AC_ARG_WITH(parens-nest-limit,
 # Handle --with-heap-limit
 AC_ARG_WITH(heap-limit,
             AS_HELP_STRING([--with-heap-limit=N],
-                           [default limit on heap memory (kibibytes, default=20000000)]),
-            , with_heap_limit=20000000)
+                           [default limit on heap memory (kibibytes, default=2000000)]),
+            , with_heap_limit=2000000)
 
 # Handle --with-match-limit=N
 AC_ARG_WITH(match-limit,
