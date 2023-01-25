@@ -610,6 +610,7 @@ SET(PCRE2_HEADERS ${PROJECT_BINARY_DIR}/pcre2.h)
 SET(PCRE2_SOURCES
   src/pcre2_auto_possess.c
   ${PROJECT_BINARY_DIR}/pcre2_chartables.c
+  src/pcre2_chkdint.c
   src/pcre2_compile.c
   src/pcre2_config.c
   src/pcre2_context.c
