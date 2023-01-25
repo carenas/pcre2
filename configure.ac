@@ -638,6 +638,8 @@ fi
 if test "$enable_debug" = "yes"; then
   AC_DEFINE([PCRE2_DEBUG], [], [
     Define to any value to include debugging code.])
+else
+  CFLAGS="$CFLAGS -DNDEBUG"
 fi
 
 if test "$enable_percent_zt" = "no"; then
