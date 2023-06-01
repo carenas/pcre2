@@ -82,31 +82,38 @@ POSSIBILITY OF SUCH DAMAGE.
 #  endif
 # endif
 
-static sljit_u8* SLJIT_FUNC FF_FUN(sljit_u8 *str_end, sljit_u8 **str_ptr, sljit_uw offs1, sljit_uw offs2, sljit_uw chars)
+static sljit_u8* SLJIT_FUNC FF_FUN(sljit_u8 *str_end, sljit_u8 **str_ptr, sljit_uw offs, sljit_uw chars)
 #undef FF_FUN
 {
 quad_word qw;
-int_char ic;
+neon_chars ic;
+#if defined(FF_UTF) || (!defined(FFCS) && !defined(FFCS_2) && !defined(FFCS_MASK))
+sljit_u32 offs1 = offs & ~0;
+#endif
+#if !defined(FFCS) && !defined(FFCS_2) && !defined(FFCS_MASK)
+sljit_u32 offs2 = offs >> 32;
+# endif
 
-SLJIT_UNUSED_ARG(offs1);
-SLJIT_UNUSED_ARG(offs2);
+#if !defined(FF_UTF) && (defined(FFCS) || defined(FFCS_2) || defined(FFCS_MASK))
+SLJIT_UNUSED_ARG(offs);
+#endif
 
 ic.x = chars;
 
 #if defined(FFCS)
-sljit_u8 c1 = ic.c.c1;
+PCRE2_UCHAR c1 = ic.c.c1;
 vect_t vc1 = VDUPQ(c1);
 
 #elif defined(FFCS_2)
-sljit_u8 c1 = ic.c.c1;
+PCRE2_UCHAR c1 = ic.c.c1;
 vect_t vc1 = VDUPQ(c1);
-sljit_u8 c2 = ic.c.c2;
+PCRE2_UCHAR c2 = ic.c.c2;
 vect_t vc2 = VDUPQ(c2);
 
 #elif defined(FFCS_MASK)
-sljit_u8 c1 = ic.c.c1;
+PCRE2_UCHAR c1 = ic.c.c1;
 vect_t vc1 = VDUPQ(c1);
-sljit_u8 mask = ic.c.c2;
+PCRE2_UCHAR mask = ic.c.c2;
 vect_t vmask = VDUPQ(mask);
 #endif
 
@@ -174,8 +181,10 @@ else
 *str_ptr += IN_UCHARS(offs1);
 #endif
 
-#if PCRE2_CODE_UNIT_WIDTH != 8
-vect_t char_mask = VDUPQ(0xff);
+#if PCRE2_CODE_UNIT_WIDTH == 16
+vect_t char_mask = VDUPQ(0xffff);
+#elif PCRE2_CODE_UNIT_WIDTH == 32
+vect_t char_mask = VDUPQ(0xffffffff);
 #endif
 
 #if defined(FF_UTF)
@@ -188,7 +197,7 @@ if (*str_ptr >= str_end)
 sljit_u8 *p1 = *str_ptr - diff;
 #endif
 sljit_s32 align_offset = ((uint64_t)*str_ptr & 0xf);
-*str_ptr = (sljit_u8 *) ((uint64_t)*str_ptr & ~0xf);
+*str_ptr = (sljit_u8 *)((uint64_t)*str_ptr & ~0xfl);
 vect_t data = VLD1Q(*str_ptr);
 #if PCRE2_CODE_UNIT_WIDTH != 8
 data = VANDQ(data, char_mask);
@@ -315,13 +324,14 @@ while (*str_ptr < str_end)
     *str_ptr += __builtin_ctzll(qw.dw[0]) / 8;
   else if (qw.dw[1])
     *str_ptr += 8 + __builtin_ctzll(qw.dw[1]) / 8;
-  else {
+  else
+    {
     *str_ptr += 16;
 #if defined (FFCPS_DIFF1)
     prev_data = orig_data;
 #endif
     continue;
-  }
+    }
 
 match:;
   if (*str_ptr >= str_end)
