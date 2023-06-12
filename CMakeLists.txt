@@ -1113,7 +1113,11 @@ echo RunTest.bat tests successfully completed
 ENDIF(PCRE2_BUILD_TESTS)
 
 # Installation
-
+if(UNIX)
+  set(CONFIG_PATH ${CMAKE_INSTALL_LIBDIR}/cmake/pcre2)
+else()
+  set(CONFIG_PATH cmake)
+endif()
 SET(CMAKE_INSTALL_ALWAYS 1)
 
 INSTALL(TARGETS ${targets}
@@ -1122,7 +1126,7 @@ INSTALL(TARGETS ${targets}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 INSTALL(EXPORT pcre2-targets
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pcre2
+        DESTINATION ${CONFIG_PATH}
         NAMESPACE pcre2::)
 INSTALL(FILES ${pkg_config_files} DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/pcre2-config"
@@ -1135,12 +1139,12 @@ INSTALL(FILES ${PCRE2_HEADERS} ${PCRE2POSIX_HEADERS} DESTINATION include)
 # CMake config files.
 set(PCRE2_CONFIG_IN  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/pcre2-config.cmake.in)
 set(PCRE2_CONFIG_OUT ${CMAKE_CURRENT_BINARY_DIR}/cmake/pcre2-config.cmake)
-configure_package_config_file(${PCRE2_CONFIG_IN} ${PCRE2_CONFIG_OUT} INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pcre2)
+configure_package_config_file(${PCRE2_CONFIG_IN} ${PCRE2_CONFIG_OUT} INSTALL_DESTINATION ${CONFIG_PATH})
 set(PCRE2_CONFIG_VERSION_OUT ${CMAKE_CURRENT_BINARY_DIR}/cmake/pcre2-config-version.cmake)
 write_basic_package_version_file(${PCRE2_CONFIG_VERSION_OUT}
                                  VERSION ${PCRE2_MAJOR}.${PCRE2_MINOR}.0
                                  COMPATIBILITY SameMajorVersion)
-install(FILES ${PCRE2_CONFIG_OUT} ${PCRE2_CONFIG_VERSION_OUT} DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/pcre2)
+install(FILES ${PCRE2_CONFIG_OUT} ${PCRE2_CONFIG_VERSION_OUT} DESTINATION ${CONFIG_PATH})
 
 FILE(GLOB html ${PROJECT_SOURCE_DIR}/doc/html/*.html)
 FILE(GLOB man1 ${PROJECT_SOURCE_DIR}/doc/*.1)
