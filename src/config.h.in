@@ -94,6 +94,9 @@ sure both macros are undefined; an emulation function will then be used. */
 /* Define to 1 if you have the `mkostemp' function. */
 #undef HAVE_MKOSTEMP
 
+/* Define to 1 if you have the `prctl' function. */
+#undef HAVE_PRCTL
+
 /* Define if you have POSIX threads libraries and header files. */
 #undef HAVE_PTHREAD
 

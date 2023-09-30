@@ -153,11 +153,12 @@ CHECK_INCLUDE_FILE(sys/types.h  HAVE_SYS_TYPES_H)
 CHECK_INCLUDE_FILE(unistd.h     HAVE_UNISTD_H)
 CHECK_INCLUDE_FILE(windows.h    HAVE_WINDOWS_H)
 
-CHECK_SYMBOL_EXISTS(bcopy         "strings.h"  HAVE_BCOPY)
-CHECK_SYMBOL_EXISTS(memfd_create  "sys/mman.h" HAVE_MEMFD_CREATE)
-CHECK_SYMBOL_EXISTS(memmove       "string.h"   HAVE_MEMMOVE)
-CHECK_SYMBOL_EXISTS(secure_getenv "stdlib.h"   HAVE_SECURE_GETENV)
-CHECK_SYMBOL_EXISTS(strerror      "string.h"   HAVE_STRERROR)
+CHECK_SYMBOL_EXISTS(bcopy         "strings.h"   HAVE_BCOPY)
+CHECK_SYMBOL_EXISTS(memfd_create  "sys/mman.h"  HAVE_MEMFD_CREATE)
+CHECK_SYMBOL_EXISTS(memmove       "string.h"    HAVE_MEMMOVE)
+CHECK_SYMBOL_EXISTS(prctl         "sys/prctl.h" HAVE_PRCTL)
+CHECK_SYMBOL_EXISTS(secure_getenv "stdlib.h"    HAVE_SECURE_GETENV)
+CHECK_SYMBOL_EXISTS(strerror      "string.h"    HAVE_STRERROR)
 
 CHECK_C_SOURCE_COMPILES(
   "#include <stdlib.h>

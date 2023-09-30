@@ -11,6 +11,7 @@
 #cmakedefine HAVE_BCOPY 1
 #cmakedefine HAVE_MEMFD_CREATE 1
 #cmakedefine HAVE_MEMMOVE 1
+#cmakedefine HAVE_PRCTL 1
 #cmakedefine HAVE_SECURE_GETENV 1
 #cmakedefine HAVE_STRERROR 1
 
