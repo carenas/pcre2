@@ -78,7 +78,7 @@ example.
  (2) Copy or rename the file src/pcre2.h.generic as src/pcre2.h.
 
  (3) EITHER:
-       Copy or rename file src/pcre2_chartables.c.dist as
+       Copy, rename or link file src/pcre2_chartables.c.dist as
        src/pcre2_chartables.c.
 
      OR:
@@ -87,7 +87,7 @@ example.
        the single argument "src/pcre2_chartables.c". This generates a set of
        standard character tables and writes them to that file. The tables are
        generated using the default C locale for your system. If you want to use
-       a locale that is specified by LC_xxx environment variables, add the -L
+       a locale that is specified by LC_ALL environment variable, add the -L
        option to the pcre2_dftables command. You must use this method if you
        are building on a system that uses EBCDIC code.
 

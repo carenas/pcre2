@@ -82,6 +82,7 @@ usage(void)
 (void)fprintf(stderr,
   "Usage: pcre2_dftables [options] <output file>\n"
   "  -b    Write output in binary (default is source code)\n"
+  "  -f    Force writing output even if not safe\n"
   "  -L    Use locale from LC_ALL (default is \"C\" locale)\n"
   );
 }
@@ -98,6 +99,7 @@ FILE *f;
 int i;
 int nclass = 0;
 BOOL binary = FALSE;
+BOOL force = FALSE;
 char *env = (char *)"C";
 const uint8_t *tables;
 const uint8_t *base_of_tables;
@@ -115,18 +117,47 @@ for (i = 1; i < argc; i++)
     return 0;
     }
 
+  else if (strcmp(arg, "-b") == 0)
+    binary = TRUE;
+
+  else if (strcmp(arg, "-f") == 0)
+    force = TRUE;
+
   else if (strcmp(arg, "-L") == 0)
     {
-    if (setlocale(LC_ALL, "") == NULL)
+    const char *locale = setlocale(LC_ALL, "");
+
+    env = getenv("LC_ALL");
+    if (env == NULL)
+      {
+      (void)fprintf(stderr, "pcre2_dftables: need an LC_ALL environment variable\n");
+      return 1;
+      }
+    if (locale == NULL)
       {
       (void)fprintf(stderr, "pcre2_dftables: setlocale() failed\n");
       return 1;
       }
-    env = getenv("LC_ALL");
+    if (!force)
+      {
+      if (strcmp(locale, env) != 0)
+        {
+        (void)fprintf(stderr,
+                      "pcre2_dftables: your \"%s\" locale is different than requested\n", locale);
+        return 1;
+        }
+      if (!binary && (*env == 0))
+        {
+        (void)fprintf(stderr, "pcre2_dftables: invalid LC_ALL environment variable\n");
+        return 1;
+        }
+      if ((int)MB_CUR_MAX > 1)
+        {
+        (void)fprintf(stderr, "pcre2_dftables: only singlebyte codesets are supported\n");
+        return 1;
+        }
+      }
     }
-
-  else if (strcmp(arg, "-b") == 0)
-    binary = TRUE;
 
   else
     {

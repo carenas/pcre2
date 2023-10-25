@@ -791,6 +791,16 @@ hardware characteristics such as endianness. This means they can be bundled
 with an application that runs in different environments, to ensure consistent
 behaviour.
 
+pcre2_dftables does some sanity checking by default to make sure the tables
+are safe, but you should be aware that only single byte codesets are supported
+by them and they will be ignored when UTF/UCP mode is enabled in the regex.
+
+If you are sure that overriding those checks is safe for your use case (ex:
+you are building a 16bit library to be used only in Windows where all text
+is going to be encoded in codepage 1252), then you can also specify -f (before
+or without -L) when running pcre2_dftables, but you have to make sure not to
+use it by mistake in files that have a different encoding or are UTF-8.
+
 See also the pcre2build section "Creating character tables at build time".
 
 
