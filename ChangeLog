@@ -153,8 +153,11 @@ the pattern /|a(?0)/ matched against "aaaa".
 39. Add a test for ridiculous ovector offset values to the substring extraction 
 functions.
 
-40. Make OP_REVERSE use IMM2_SIZE for its data instead of LINK_SIZE, for 
+40. Make OP_REVERSE use IMM2_SIZE for its data instead of LINK_SIZE, for
 consistency with OP_VREVERSE.
+
+41. In some legacy environments with a pre C99 snprintf, pcre2_regerror could
+return an incorrect value when the provided buffer was too small.
 
 
 Version 10.42 11-December-2022
