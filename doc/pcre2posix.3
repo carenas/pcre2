@@ -264,7 +264,7 @@ function.
 .sp
 When this option is set, the subject string starts at \fIstring\fP +
 \fIpmatch[0].rm_so\fP and ends at \fIstring\fP + \fIpmatch[0].rm_eo\fP, which
-should point to the first character beyond the string. There may be binary
+must point to the first character beyond the string. There may be binary
 zeros within the subject string, and indeed, using REG_STARTEND is the only
 way to pass a subject string that contains a binary zero.
 .P
@@ -279,7 +279,8 @@ This is a BSD extension, compatible with but not specified by IEEE Standard
 portable to other systems. Note that a non-zero \fIrm_so\fP does not imply
 REG_NOTBOL; REG_STARTEND affects only the location and length of the string,
 not how it is matched. Setting REG_STARTEND and passing \fIpmatch\fP as NULL
-are mutually exclusive; the error REG_INVARG is returned.
+are mutually exclusive; the error REG_INVARG is returned. This error is also
+returned if the values provided in \FIpmatch[0]\fP are invalid.
 .P
 If the pattern was compiled with the REG_NOSUB flag, no data about any matched
 strings is returned. The \fInmatch\fP and \fIpmatch\fP arguments of

@@ -144,4 +144,8 @@
 \= Expect error
     xxxx 
 
+/abc/
+\= Expect error
+    abc\=posix_startend=3:2
+
 # End of testdata/testinput18

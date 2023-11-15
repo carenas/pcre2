@@ -227,4 +227,9 @@ No match: POSIX code 16: bad argument
     xxxx 
 No match: POSIX code 14: failed to get memory
 
+/abc/
+\= Expect error
+    abc\=posix_startend=3:2
+No match: POSIX code 16: bad argument
+
 # End of testdata/testinput18
