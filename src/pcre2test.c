@@ -418,7 +418,7 @@ static cmdstruct cmdlist[] = {
   { "save",            CMD_SAVE },
   { "subject",         CMD_SUBJECT }};
 
-#define cmdlistcount (sizeof(cmdlist)/sizeof(cmdstruct))
+#define cmdlistcount (uint16_t)(sizeof(cmdlist)/sizeof(cmdstruct))
 
 /* ------------- Structures and tables for handling modifiers -------------- */
 
@@ -5002,7 +5002,7 @@ FILE *f;
 PCRE2_SIZE serial_size;
 size_t i;
 int rc, cmd, cmdlen, yield;
-uint16_t first_listed_newline;
+uint16_t s, first_listed_newline;
 const char *cmdname;
 uint8_t *argptr, *serial;
 
@@ -5010,14 +5010,14 @@ yield = PR_OK;
 cmd = CMD_UNKNOWN;
 cmdlen = 0;
 
-for (i = 0; i < cmdlistcount; i++)
+for (s = 0; s < cmdlistcount; s++)
   {
-  cmdname = cmdlist[i].name;
+  cmdname = cmdlist[s].name;
   cmdlen = strlen(cmdname);
   if (strncmp((char *)(buffer+1), cmdname, cmdlen) == 0 &&
       isspace(buffer[cmdlen+1]))
     {
-    cmd = cmdlist[i].value;
+    cmd = cmdlist[s].value;
     break;
     }
   }
@@ -5068,14 +5068,14 @@ switch(cmd)
     {
     while (isspace(*argptr)) argptr++;
     if (*argptr == 0) break;
-    for (i = 1; i < sizeof(newlines)/sizeof(char *); i++)
+    for (s = 1; s < sizeof(newlines)/sizeof(char *); s++)
       {
-      size_t nlen = strlen(newlines[i]);
-      if (strncmpic(argptr, (const uint8_t *)newlines[i], nlen) == 0 &&
+      size_t nlen = strlen(newlines[s]);
+      if (strncmpic(argptr, (const uint8_t *)newlines[s], nlen) == 0 &&
           isspace(argptr[nlen]))
         {
-        if (i == NEWLINE_DEFAULT) return PR_OK;  /* Default is valid */
-        if (first_listed_newline == 0) first_listed_newline = i;
+        if (s == NEWLINE_DEFAULT) return PR_OK;  /* Default is valid */
+        if (first_listed_newline == 0) first_listed_newline = s;
         }
       }
     while (*argptr != 0 && !isspace(*argptr)) argptr++;
