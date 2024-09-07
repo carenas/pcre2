@@ -16,7 +16,7 @@ for l in glibtoolize libtoolize15 libtoolize14 libtoolize ; do
     $l --version > /dev/null 2>&1
     if [ $? = 0 ]; then
         libtoolize=$l
-        echo "Found $l" 
+        $l --version
         break
     fi
     echo "Did not find $l" 
