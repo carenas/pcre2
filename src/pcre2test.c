@@ -4361,6 +4361,31 @@ else fprintf(outfile, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s",
 }
 
 
+/*************************************************
+*           Show optimization options            *
+*************************************************/
+
+/*
+Arguments:
+  options     an options word
+  before      text to print before
+  after       text to print after
+
+Returns:      nothing
+*/
+
+static void
+show_optimize_options(uint32_t options, const char *before, const char *after)
+{
+if (options == 0) fprintf(outfile, "%s <none>%s", before, after);
+else fprintf(outfile, "%sauto_possess=%s,dotstar_anchor=%s,start_optimize=%s%s",
+  before,
+  ((options & PCRE2_OPTIM_AUTO_POSSESS) != 0) ? "yes" : "no",
+  ((options & PCRE2_OPTIM_DOTSTAR_ANCHOR) != 0) ? "yes" : "no",
+  ((options & PCRE2_OPTIM_START_OPTIMIZE) != 0) ? "yes" : "no",
+  after);
+}
+
 
 #ifdef SUPPORT_PCRE2_8
 /*************************************************
@@ -4777,6 +4802,9 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   if (extra_options != 0)
     show_compile_extra_options(extra_options, "Extra options:", "\n");
 
+  if (FLD(compiled_code, optimization_flags) != 0x7)
+    show_optimize_options(FLD(compiled_code, optimization_flags), "Optimizations: ", "\n");
+
   if (jchanged) fprintf(outfile, "Duplicate name status changes\n");
 
   if ((pat_patctl.control2 & CTL2_BSR_SET) != 0 ||
@@ -4879,7 +4907,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
       }
     }
 
-  if ((FLD(compiled_code, overall_options) & PCRE2_NO_START_OPTIMIZE) == 0)
+  if (FLD(compiled_code, optimization_flags) & PCRE2_OPTIM_START_OPTIMIZE)
     fprintf(outfile, "Subject length lower bound = %d\n", minlength);
 
   if (pat_patctl.jit != 0 && (pat_patctl.control & CTL_JITVERIFY) != 0)

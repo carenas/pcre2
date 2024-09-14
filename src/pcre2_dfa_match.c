@@ -3699,7 +3699,7 @@ for (;;)
   these, for testing and for ensuring that all callouts do actually occur.
   The optimizations must also be avoided when restarting a DFA match. */
 
-  if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0 &&
+  if ((re->optimization_flags & PCRE2_OPTIM_START_OPTIMIZE) &&
       (options & PCRE2_DFA_RESTART) == 0)
     {
     /* If firstline is TRUE, the start of the match is constrained to the first
