@@ -615,6 +615,8 @@ total length of the tables. */
 #define PCRE2_OPTIM_DOTSTAR_ANCHOR  0x00000002u
 #define PCRE2_OPTIM_START_OPTIMIZE  0x00000004u
 
+#define OPTIMIZATION_DEFAULT        0x00000007u     /* Mask for all */
+
 /* Tables for converting public optimization directives listed in
 pcre2.h to private optimization flags. */
 

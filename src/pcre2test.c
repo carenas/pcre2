@@ -4802,7 +4802,7 @@ if ((pat_patctl.control & CTL_INFO) != 0)
   if (extra_options != 0)
     show_compile_extra_options(extra_options, "Extra options:", "\n");
 
-  if (FLD(compiled_code, optimization_flags) != 0x7)
+  if (FLD(compiled_code, optimization_flags) != OPTIMIZATION_DEFAULT)
     show_optimize_options(FLD(compiled_code, optimization_flags), "Optimizations: ", "\n");
 
   if (jchanged) fprintf(outfile, "Duplicate name status changes\n");

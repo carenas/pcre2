@@ -10366,7 +10366,8 @@ int regexrc;                          /* Return from compile */
 uint32_t i;                           /* Local loop counter */
 
 /* Enable all optimizations by default. */
-uint32_t optim_flags = ccontext != NULL ? ccontext->optimization_flags : 0x7;
+uint32_t optim_flags = ccontext != NULL ? ccontext->optimization_flags :
+                                          OPTIMIZATION_DEFAULT;
 
 /* Comments at the head of this file explain about these variables. */
 
