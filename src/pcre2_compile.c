@@ -1894,9 +1894,9 @@ else
     case CHAR_1: case CHAR_2: case CHAR_3: case CHAR_4: case CHAR_5:
     case CHAR_6: case CHAR_7: case CHAR_8: case CHAR_9:
 
+    oldptr = ptr;
     if (!isclass)
       {
-      oldptr = ptr;
       ptr--;   /* Back to the digit */
 
       /* As we know we are at a digit, the only possible error from
@@ -1907,15 +1907,13 @@ else
       \1 to \9 are always back references. \8x and \9x are too; \1x to \7x
       are octal escapes if there are not that many previous captures. */
 
-      if (read_number(&ptr, ptrend, -1, INT_MAX/10 - 1, 0, &s, errorcodeptr) &&
+      if (read_number(&ptr, ptrend, -1, INT_MAX/10 - 1, ERR61, &s, errorcodeptr) &&
           (s < 10 || oldptr[-1] >= CHAR_8 || (unsigned)s <= bracount))
         {
         if (s > (int)MAX_GROUP_NUMBER) *errorcodeptr = ERR61;
           else escape = -s;     /* Indicates a back reference */
         break;
         }
-
-      ptr = oldptr;      /* Put the pointer back and fall through */
       }
 
     /* Handle a digit following \ when the number is not a back reference, or
@@ -1924,6 +1922,13 @@ else
     least by Perl 5.18 this changed so as not to insert the binary zero. */
 
     if (c >= CHAR_8) break;
+
+    /* read_number() could have returned an overflow error, but that is no longer
+    relevant since we are about to read the number again, but this time correctly
+    as an octal. Put the pointer back for fall through */
+
+    ptr = oldptr;
+    *errorcodeptr = 0;
 
     /* Fall through */
 
