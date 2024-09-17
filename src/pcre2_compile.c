@@ -1368,6 +1368,8 @@ uint32_t n = 0;
 PCRE2_SPTR ptr = *ptrptr;
 BOOL yield = FALSE;
 
+PCRE2_ASSERT(max_value <= INT_MAX/10 - 1);
+
 *errorcodeptr = 0;
 
 if (allow_sign >= 0 && ptr < ptrend)
@@ -1908,11 +1910,10 @@ else
       \1 to \9 are always back references. \8x and \9x are too; \1x to \7x
       are octal escapes if there are not that many previous captures. */
 
-      if (read_number(&ptr, ptrend, -1, INT_MAX/10 - 1, ERR61, &s, errorcodeptr) &&
-          (s < 10 || oldptr[-1] >= CHAR_8 || (unsigned)s <= bracount))
+      if (read_number(&ptr, ptrend, -1, MAX_GROUP_NUMBER, ERR61, &s, errorcodeptr) &&
+          (s < 10 || c >= CHAR_8 || (unsigned)s <= bracount))
         {
-        if (s > (int)MAX_GROUP_NUMBER) *errorcodeptr = ERR61;
-          else escape = -s;     /* Indicates a back reference */
+        escape = -s;     /* Indicates a back reference */
         break;
         }
       }
