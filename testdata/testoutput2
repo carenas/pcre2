@@ -5506,13 +5506,13 @@ Subject length lower bound = 4
 No match
 
 /a{11111111111111111111}/I
-Failed: error 105 at offset 8: number too big in {} quantifier
+Failed: error 105 at offset 22: number too big in {} quantifier
 
 /(){64294967295}/I
-Failed: error 105 at offset 9: number too big in {} quantifier
+Failed: error 105 at offset 14: number too big in {} quantifier
 
 /(){2,4294967295}/I
-Failed: error 105 at offset 11: number too big in {} quantifier
+Failed: error 105 at offset 15: number too big in {} quantifier
 
 "(?i:a)(?i:b)(?i:c)(?i:d)(?i:e)(?i:f)(?i:g)(?i:h)(?i:i)(?i:j)(k)(?i:l)A\1B"I
 Capture group count = 1
@@ -8374,7 +8374,7 @@ No match
 Failed: error 166 at offset 7: (*MARK) must have an argument
 
 /\g6666666666/
-Failed: error 161 at offset 7: subpattern number is too big
+Failed: error 161 at offset 12: subpattern number is too big
 
 /[\g6666666666]/B
 ------------------------------------------------------------------
@@ -14521,7 +14521,7 @@ Failed: error 162 at offset 4: subpattern name expected
 "(?J:(?|(?'R')(\k'R')|((?'R'))))"
 
 /(?<=|(\,\$(?73591620449005828816)\xa8.{7}){6}\x09)/
-Failed: error 161 at offset 17: subpattern number is too big
+Failed: error 161 at offset 32: subpattern number is too big
 
 /^(?:(?(1)x|)+)+$()/B
 ------------------------------------------------------------------
@@ -14712,7 +14712,7 @@ No match
  0: ab
 
 /(?(8000000000/
-Failed: error 161 at offset 8: subpattern number is too big
+Failed: error 161 at offset 13: subpattern number is too big
 
 /((?(R8000000000)))/
 Failed: error 161 at offset 9: subpattern number is too big
@@ -14732,7 +14732,7 @@ Failed: error 161 at offset 8: subpattern number is too big
 Failed: error 161 at offset 11: subpattern number is too big
 
 /a\8000000000b/
-Failed: error 161 at offset 11: subpattern number is too big
+Failed: error 161 at offset 12: subpattern number is too big
 
 /(*LIMIT_MATCH=)abc/
 Failed: error 160 at offset 14: (*VERB) not recognized or malformed

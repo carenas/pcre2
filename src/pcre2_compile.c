@@ -1392,6 +1392,7 @@ while (ptr < ptrend && IS_DIGIT(*ptr))
   if (n > max_value)
     {
     *errorcodeptr = max_error;
+    while (ptr < ptrend && IS_DIGIT(*ptr)) ptr++;
     goto EXIT;
     }
   }
