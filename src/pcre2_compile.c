@@ -10419,12 +10419,20 @@ if ((options & ~PUBLIC_COMPILE_OPTIONS) != 0 ||
   return NULL;
   }
 
-if ((options & PCRE2_LITERAL) != 0 &&
-    ((options & ~PUBLIC_LITERAL_COMPILE_OPTIONS) != 0 ||
-     (ccontext->extra_options & ~PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS) != 0))
+if ((options & PCRE2_LITERAL) != 0)
   {
-  *errorptr = ERR92;
-  return NULL;
+    if ((options & ~PUBLIC_LITERAL_COMPILE_OPTIONS) != 0 ||
+        (ccontext->extra_options & ~PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS) != 0)
+    {
+    *errorptr = ERR92;
+    return NULL;
+    }
+
+/* The auto_possessification and dotstar_anchor optimizations can also be
+disabled by calling pcre2_set_optimize() so make sure to ignore those bits
+for consisency. */
+
+    optim_flags |= (PCRE2_OPTIM_AUTO_POSSESS | PCRE2_OPTIM_DOTSTAR_ANCHOR);
   }
 
 /* A zero-terminated pattern is indicated by the special length value

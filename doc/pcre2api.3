@@ -1768,6 +1768,11 @@ PCRE2_NO_START_OPTIMIZE, PCRE2_NO_UTF_CHECK, PCRE2_UTF, and
 PCRE2_USE_OFFSET_LIMIT. The extra options PCRE2_EXTRA_MATCH_LINE and
 PCRE2_EXTRA_MATCH_WORD are also supported. Any other options cause an error.
 .sp
+Starting with 10.45, PCRE2_NO_AUTO_POSSESS and PCRE2_NO_DOTSTAR_ANCHOR are
+considered deprecated and therefore their corresponding optimizations could be
+disabled instead by calling \fBpcre2_set_optimize()\fP, in that case no error
+should be expected from \fBpcre2_compile()\fP.
+.sp
   PCRE2_MATCH_INVALID_UTF
 .sp
 This option forces PCRE2_UTF (see below) and also enables support for matching

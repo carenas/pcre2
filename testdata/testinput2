@@ -5456,17 +5456,17 @@ a)"xI
     syndicate
 
 # Confirm that the pcre2_set_optimize API does not have any undesired effect on literal patterns
-/(cat)|dog/literal,auto_possess_off
+/(cat)|dog/I,literal,auto_possess_off
     (cat)|dog
 \= Expect no match
     the cat sat
 
-/(cat)|dog/literal,dotstar_anchor_off
+/(cat)|dog/I,literal,dotstar_anchor_off
     (cat)|dog
 \= Expect no match
     the cat sat
 
-/(cat)|dog/literal,optimization_none
+/(cat)|dog/I,literal,optimization_none
     (cat)|dog
 \= Expect no match
     the cat sat
