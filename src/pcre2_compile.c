@@ -1848,8 +1848,9 @@ else
       /* As we know we are at a digit, the only possible error from
       read_number() is a number that is too large to be a group number. Because
       that number might be still valid if read as an octal, errorcodeptr is not
-      set on failure and therefore a bogus value of INT_MAX is set instead that
-      will be used later to properly set the error, if not falling through. */
+      set on failure and therefore a sentinel value of INT_MAX is used instead
+      of the original value, and will be used later to properly set the error,
+      if not falling through. */
 
       if (!read_number(&ptr, ptrend, -1, MAX_GROUP_NUMBER, 0, &s, errorcodeptr))
         s = INT_MAX;
@@ -1860,10 +1861,14 @@ else
       if (s < 10 || c >= CHAR_8 || (unsigned)s <= bracount)
         {
         /* s > MAX_GROUP_NUMBER should not be possible because of read_number(),
-        but we keep it just to be safe and because it will also catch the bogus
-        value set on failure of that function. */
+        but we keep it just to be safe and because it will also catch the
+        sentinel value that was set on failure by that function. */
 
-        if ((unsigned)s > MAX_GROUP_NUMBER) *errorcodeptr = ERR61;
+        if ((unsigned)s > MAX_GROUP_NUMBER)
+          {
+          PCRE2_ASSERT(s == INT_MAX);
+          *errorcodeptr = ERR61;
+          }
         else escape = -s;     /* Indicates a back reference */
         break;
         }
@@ -5245,7 +5250,7 @@ for (;;)
     }
   }
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 }
 
 
@@ -5525,6 +5530,7 @@ have duplicate names. Give an internal error. */
 
 if (i >= cb->names_found)
   {
+  PCRE2_DEBUG_UNREACHABLE();
   *errorcodeptr = ERR53;
   cb->erroroffset = name - cb->start_pattern;
   return FALSE;
@@ -8452,7 +8458,7 @@ for (;; pptr++)
     }         /* End of big switch */
   }           /* End of big loop */
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 }
 
 
@@ -8758,7 +8764,7 @@ for (;;)
   pptr++;
   }
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 }
 
 
@@ -9382,6 +9388,7 @@ for (;; pptr++)
     /* This should never occur. */
 
     case META_END:
+    PCRE2_DEBUG_UNREACHABLE();
     return NULL;
 
     /* The data for these items is variable in length. */
@@ -9446,7 +9453,7 @@ for (;; pptr++)
   pptr += meta_extra_lengths[meta];
   }
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 
@@ -10508,7 +10515,8 @@ if ((options & PCRE2_LITERAL) == 0)
           optim_flags &= ~(p->value);
 
           /* For backward compatibility the three original VERBs to disable
-          optimizations need to also update the corresponding external option. */
+          optimizations need to also update the corresponding bit in the
+          external options. */
 
           switch(p->value)
             {
@@ -10528,7 +10536,9 @@ if ((options & PCRE2_LITERAL) == 0)
           break;
 
           default:
-          PCRE2_UNREACHABLE();
+          /* Fail assertion if a new type was added and someone forgot to
+          update this switch */
+          PCRE2_DEBUG_UNREACHABLE();
           }
         break;   /* Out of the table scan loop */
         }
