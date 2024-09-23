@@ -1863,7 +1863,12 @@ else
         but we keep it just to be safe and because it will also catch the bogus
         value set on failure of that function. */
 
-        if ((unsigned)s > MAX_GROUP_NUMBER) *errorcodeptr = ERR61;
+        if ((unsigned)s > MAX_GROUP_NUMBER)
+          {
+          if (s != INT_MAX)
+            PCRE2_DEBUG_UNREACHABLE();
+          *errorcodeptr = ERR61;
+          }
         else escape = -s;     /* Indicates a back reference */
         break;
         }
@@ -5245,7 +5250,7 @@ for (;;)
     }
   }
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 }
 
 
@@ -5525,6 +5530,7 @@ have duplicate names. Give an internal error. */
 
 if (i >= cb->names_found)
   {
+  PCRE2_DEBUG_UNREACHABLE();
   *errorcodeptr = ERR53;
   cb->erroroffset = name - cb->start_pattern;
   return FALSE;
@@ -8452,7 +8458,7 @@ for (;; pptr++)
     }         /* End of big switch */
   }           /* End of big loop */
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 }
 
 
@@ -8758,7 +8764,7 @@ for (;;)
   pptr++;
   }
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 }
 
 
@@ -9382,6 +9388,7 @@ for (;; pptr++)
     /* This should never occur. */
 
     case META_END:
+    PCRE2_DEBUG_UNREACHABLE();
     return NULL;
 
     /* The data for these items is variable in length. */
@@ -9446,7 +9453,7 @@ for (;; pptr++)
   pptr += meta_extra_lengths[meta];
   }
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 
@@ -10528,7 +10535,8 @@ if ((options & PCRE2_LITERAL) == 0)
           break;
 
           default:
-          PCRE2_UNREACHABLE();
+          /* Fail assertion if new type was added and someone forgot to update this switch */
+          PCRE2_DEBUG_UNREACHABLE();
           }
         break;   /* Out of the table scan loop */
         }

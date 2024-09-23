@@ -813,7 +813,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       offset = Flast_group_offset;
       for(;;)
         {
-        if (offset == PCRE2_UNSET) return PCRE2_ERROR_INTERNAL;
+        if (offset == PCRE2_UNSET)
+          {
+          PCRE2_DEBUG_UNREACHABLE();
+          return PCRE2_ERROR_INTERNAL;
+          }
         N = (heapframe *)((char *)match_data->heapframes + offset);
         P = (heapframe *)((char *)N - frame_size);
         if (N->group_frame_type == (GF_CAPTURE | number)) break;
@@ -852,7 +856,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       offset = Flast_group_offset;
       for(;;)
         {
-        if (offset == PCRE2_UNSET) return PCRE2_ERROR_INTERNAL;
+        if (offset == PCRE2_UNSET)
+          {
+          PCRE2_DEBUG_UNREACHABLE();
+          return PCRE2_ERROR_INTERNAL;
+          }
         N = (heapframe *)((char *)match_data->heapframes + offset);
         P = (heapframe *)((char *)N - frame_size);
         if (GF_IDMASK(N->group_frame_type) == GF_RECURSE) break;
@@ -2607,6 +2615,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         /* This should never occur */
 
         default:
+        PCRE2_DEBUG_UNREACHABLE();
         return PCRE2_ERROR_INTERNAL;
         }
 
@@ -2970,6 +2979,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           /* This should not occur */
 
           default:
+          PCRE2_DEBUG_UNREACHABLE();
           return PCRE2_ERROR_INTERNAL;
           }
         }
@@ -3245,6 +3255,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         break;
 
         default:
+        PCRE2_DEBUG_UNREACHABLE();
         return PCRE2_ERROR_INTERNAL;
         }  /* End switch(Lctype) */
 
@@ -3497,6 +3508,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
         break;
 
         default:
+        PCRE2_DEBUG_UNREACHABLE();
         return PCRE2_ERROR_INTERNAL;
         }
       }
@@ -3811,6 +3823,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
           /* This should never occur */
           default:
+          PCRE2_DEBUG_UNREACHABLE();
           return PCRE2_ERROR_INTERNAL;
           }
         }
@@ -3965,6 +3978,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             break;
 
             default:
+            PCRE2_DEBUG_UNREACHABLE();
             return PCRE2_ERROR_INTERNAL;
             }
           }
@@ -4109,12 +4123,13 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
             break;
 
             default:
+            PCRE2_DEBUG_UNREACHABLE();
             return PCRE2_ERROR_INTERNAL;
             }
           }
         }
 
-      PCRE2_UNREACHABLE(); /* Control never reaches here */
+      PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
       }
 
     /* If maximizing, it is worth using inline code for speed, doing the type
@@ -4392,6 +4407,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           break;
 
           default:
+          PCRE2_DEBUG_UNREACHABLE();
           return PCRE2_ERROR_INTERNAL;
           }
 
@@ -4710,6 +4726,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           break;
 
           default:
+          PCRE2_DEBUG_UNREACHABLE();
           return PCRE2_ERROR_INTERNAL;
           }
 
@@ -4967,6 +4984,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
           break;
 
           default:
+          PCRE2_DEBUG_UNREACHABLE();
           return PCRE2_ERROR_INTERNAL;
           }
 
@@ -5201,7 +5219,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       RRETURN(MATCH_NOMATCH);
       }
 
-    PCRE2_UNREACHABLE(); /* Control never reaches here */
+    PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 
 #undef Lcaseless
 #undef Lmin
@@ -6116,7 +6134,11 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
       /* It is the end of whole-pattern recursion. */
 
       offset = Flast_group_offset;
-      if (offset == PCRE2_UNSET) return PCRE2_ERROR_INTERNAL;
+      if (offset == PCRE2_UNSET)
+        {
+        PCRE2_DEBUG_UNREACHABLE();
+        return PCRE2_ERROR_INTERNAL;
+        }
       N = (heapframe *)((char *)match_data->heapframes + offset);
       P = (heapframe *)((char *)N - frame_size);
       Flast_group_offset = P->last_group_offset;
@@ -6613,6 +6635,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
     something seriously wrong in the code above or the OP_xxx definitions. */
 
     default:
+    PCRE2_DEBUG_UNREACHABLE();
     return PCRE2_ERROR_INTERNAL;
     }
 
@@ -6622,8 +6645,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
   }  /* End of main loop */
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
-
+PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 
 /* ========================================================================= */
 /* The RRETURN() macro jumps here. The number that is saved in Freturn_id
@@ -6663,6 +6685,7 @@ switch (Freturn_id)
 #endif
 
   default:
+  PCRE2_DEBUG_UNREACHABLE();
   return PCRE2_ERROR_INTERNAL;
   }
 #undef LBL
@@ -7180,7 +7203,9 @@ switch(re->newline_convention)
   mb->nltype = NLTYPE_ANYCRLF;
   break;
 
-  default: return PCRE2_ERROR_INTERNAL;
+  default:
+  PCRE2_DEBUG_UNREACHABLE();
+  return PCRE2_ERROR_INTERNAL;
   }
 
 /* The backtracking frames have fixed data at the front, and a PCRE2_SIZE

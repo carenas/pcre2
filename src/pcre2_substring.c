@@ -343,7 +343,10 @@ else  /* Matched using pcre2_dfa_match() */
 left = match_data->ovector[stringnumber*2];
 right = match_data->ovector[stringnumber*2+1];
 if (left > match_data->subject_length || right > match_data->subject_length)
+  {
+  PCRE2_DEBUG_UNREACHABLE();
   return PCRE2_ERROR_INVALIDOFFSET;
+  }
 if (sizeptr != NULL) *sizeptr = (left > right)? 0 : right - left;
 return 0;
 }

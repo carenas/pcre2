@@ -903,7 +903,7 @@ for (;;)
     return dent->d_name;
   }
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 static void
@@ -2487,10 +2487,13 @@ while (length > 0)
       break;
 
       /* LCOV_EXCL_START */
-      default:         /* Even though this should not occur, the string having */
-      case DDE_ERROR:  /* been checked above, we need to include the free() */
-      free(args);      /* calls so that source checkers do not complain. */
+      default:
+      /* Even though this should not occur, the string having been checked above,
+       * we need to include the free() calls so that source checkers do not complain. */
+      case DDE_ERROR:
+      free(args);
       free(argsvector);
+      PCRE2_DEBUG_UNREACHABLE();
       return 0;
       /* LCOV_EXCL_STOP */
       }
