@@ -1137,6 +1137,7 @@ for (int i = 0; i < 2; i++)
     break;
 
     default:
+    PCRE2_DEBUG_UNREACHABLE();
     *bufflenptr = 0;  /* Error offset */
     return PCRE2_ERROR_INTERNAL;
     }
@@ -1160,8 +1161,9 @@ for (int i = 0; i < 2; i++)
 
 /* Normally, we should exit this function in the previous loop, but we
 can't return an API call without a meaningful value, so if something
-went terribly wrong, we then will just report it as an intenal error */
+went terribly wrong, we then will just report it as an internal error */
 
+PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 return PCRE2_ERROR_INTERNAL;
 }
 

@@ -199,7 +199,7 @@ static BOOL
 check_char_prop(uint32_t c, unsigned int ptype, unsigned int pdata,
   BOOL negated)
 {
-BOOL ok;
+BOOL ok, rc;
 const uint32_t *p;
 const ucd_record *prop = GET_UCD(c);
 
@@ -240,13 +240,13 @@ switch(ptype)
     {
     HSPACE_CASES:
     VSPACE_CASES:
-    return negated;
+    rc = negated;
+    break;
 
     default:
-    return (PRIV(ucp_gentype)[prop->chartype] == ucp_Z) == negated;
+    rc = (PRIV(ucp_gentype)[prop->chartype] == ucp_Z) == negated;
     }
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
-  break;
+  return rc;
 
   case PT_WORD:
   return (PRIV(ucp_gentype)[prop->chartype] == ucp_L ||
@@ -260,7 +260,7 @@ switch(ptype)
     if (c < *p) return !negated;
     if (c == *p++) return negated;
     }
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+  PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
   break;
 
   /* Haven't yet thought these through. */
@@ -456,6 +456,7 @@ switch(c)
        {
        /* Early return if there is not enough space. This should never
        happen, since all clists are shorter than 5 character now. */
+       PCRE2_DEBUG_UNREACHABLE();
        list[2] = code[0];
        list[3] = code[1];
        return code;
@@ -1121,7 +1122,7 @@ for(;;)
   if (list[1] == 0) return TRUE;
   }
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_DEBUG_UNREACHABLE(); /* Control should never reach here */
 }
 
 
