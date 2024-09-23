@@ -5245,7 +5245,7 @@ for (;;)
     }
   }
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 
@@ -8430,7 +8430,7 @@ for (;; pptr++)
     }         /* End of big switch */
   }           /* End of big loop */
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 
@@ -8736,7 +8736,7 @@ for (;;)
   pptr++;
   }
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 
@@ -9424,7 +9424,7 @@ for (;; pptr++)
   pptr += meta_extra_lengths[meta];
   }
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 

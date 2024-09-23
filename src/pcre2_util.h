@@ -43,27 +43,53 @@ POSSIBILITY OF SUCH DAMAGE.
 
 /* Assertion macros */
 
-#ifdef HAVE_BUILTIN_UNREACHABLE
-#define PCRE2_UNREACHABLE() __builtin_unreachable()
-#elif HAVE_BUILTIN_ASSUME
-#define PCRE2_UNREACHABLE() __assume(0)
-#else
-#define PCRE2_UNREACHABLE() do {} while(0)
-#endif
-
 #ifdef PCRE2_DEBUG
+
 #if defined(HAVE_ASSERT_H) && !defined(NDEBUG)
 #include <assert.h>
 #define PCRE2_ASSERT(x) assert(x)
 #elif defined(HAVE_STDLIB_H) && defined(HAVE_STDIO_H)
-#define PCRE2_ASSERT(x) do { if (!(x)) { fprintf(stderr, "Assertion failed at " __FILE__ ":%d\n", __LINE__); abort(); }} while(0)
+#define PCRE2_ASSERT(x) do                                            \
+{                                                                     \
+  if (!(x))                                                           \
+  {                                                                   \
+  fprintf(stderr, "Assertion failed at " __FILE__ ":%d\n", __LINE__); \
+  abort();                                                            \
+  }                                                                   \
+} while(0)
+#else
+#warning "missing implementation of PCRE2_ASSERT()"
 #endif
+
+#define PCRE2_UNREACHABLE() do                                      \
+{                                                                   \
+fprintf(stderr, "Execution reached unexpected point at " __FILE__   \
+                ":%d\n", __LINE__);                                 \
+abort();                                                            \
+} while(0)
+#define PCRE2_MAYBE_UNREACHABLE() PCRE2_UNREACHABLE()
+
+#endif /* PCRE2_DEBUG */
+
+#ifndef PCRE2_MAYBE_UNREACHABLE
+#define PCRE2_MAYBE_UNREACHABLE() do {} while(0)
 #endif
+
+#ifndef PCRE2_UNREACHABLE
+#ifdef HAVE_BUILTIN_UNREACHABLE
+#define PCRE2_UNREACHABLE() __builtin_unreachable()
+#elif defined(HAVE_BUILTIN_ASSUME)
+#define PCRE2_UNREACHABLE() __assume(0)
+#else
+#warning "missing implementation of PCRE2_UNREACHABLE()"
+#define PCRE2_UNREACHABLE() do {} while(0)
+#endif
+#endif /* !PCRE2_UNREACHABLE */
 
 #ifndef PCRE2_ASSERT
 #define PCRE2_ASSERT(x) do {} while(0)
 #endif
 
-#endif  /* PCRE2_UTIL_H_IDEMPOTENT_GUARD */
+#endif /* PCRE2_UTIL_H_IDEMPOTENT_GUARD */
 
 /* End of pcre2_util.h */

@@ -1162,6 +1162,7 @@ for (int i = 0; i < 2; i++)
 can't return an API call without a meaningful value, so if something
 went terribly wrong, we then will just report it as an intenal error */
 
+PCRE2_MAYBE_UNREACHABLE(); /* Control should never reach here */
 return PCRE2_ERROR_INTERNAL;
 }
 

@@ -245,7 +245,7 @@ switch(ptype)
     default:
     return (PRIV(ucp_gentype)[prop->chartype] == ucp_Z) == negated;
     }
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+  PCRE2_UNREACHABLE(0); /* Control never reaches here */
   break;
 
   case PT_WORD:
@@ -260,7 +260,7 @@ switch(ptype)
     if (c < *p) return !negated;
     if (c == *p++) return negated;
     }
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+  PCRE2_UNREACHABLE(0); /* Control never reaches here */
   break;
 
   /* Haven't yet thought these through. */
@@ -1121,7 +1121,7 @@ for(;;)
   if (list[1] == 0) return TRUE;
   }
 
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+PCRE2_UNREACHABLE(); /* Control never reaches here */
 }
 
 
