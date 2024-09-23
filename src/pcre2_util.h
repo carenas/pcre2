@@ -48,7 +48,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #if defined(HAVE_ASSERT_H) && !defined(NDEBUG)
 #include <assert.h>
 #define PCRE2_ASSERT(x) assert(x)
-#elif defined(HAVE_STDLIB_H) && defined(HAVE_STDIO_H)
+#else
 #define PCRE2_ASSERT(x) do                                            \
 {                                                                     \
   if (!(x))                                                           \
@@ -57,8 +57,6 @@ POSSIBILITY OF SUCH DAMAGE.
   abort();                                                            \
   }                                                                   \
 } while(0)
-#else
-#warning "missing implementation of PCRE2_ASSERT()"
 #endif
 
 #define PCRE2_UNREACHABLE() do                                      \
