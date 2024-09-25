@@ -898,12 +898,12 @@ readdirectory(directory_type *dir)
 for (;;)
   {
   struct dirent *dent = readdir(dir);
-  if (dent == NULL) return NULL;
+  if (dent == NULL) break;
   if (strcmp(dent->d_name, ".") != 0 && strcmp(dent->d_name, "..") != 0)
     return dent->d_name;
   }
 
-PCRE2_UNREACHABLE(); /* Control never reaches here */
+return NULL;
 }
 
 static void
@@ -1696,9 +1696,9 @@ switch(endlinetype)
     {
     p -= 2;
     while (p > startptr && p[-1] != '\n') p--;
-    if (p <= startptr + 1 || p[-2] == '\r') return p;
+    if (p <= startptr + 1 || p[-2] == '\r') break;
     }
-  PCRE2_UNREACHABLE(); /* Control never reaches here */
+  return p;
 
   case PCRE2_NEWLINE_ANY:
   case PCRE2_NEWLINE_ANYCRLF:
