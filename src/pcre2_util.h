@@ -45,6 +45,15 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef PCRE2_DEBUG
 
+/* PCRE2_ASSERT(x) can be used to inject an assert() for conditions
+that the code below doesn't support. It is a NOP for non debug builds
+but in debug builds will print information about the location of the
+code where it triggered and crash.
+
+it is meant to work like assert(), and therefore the expressiom used
+should indicate what the expected state is, and shouldn't have any
+sideeffects. */
+
 #if defined(HAVE_ASSERT_H) && !defined(NDEBUG)
 #include <assert.h>
 #define PCRE2_ASSERT(x) assert(x)
@@ -59,12 +68,27 @@ POSSIBILITY OF SUCH DAMAGE.
 } while(0)
 #endif
 
+/* PCRE2_UNREACHABLE() can be used to mark locations on the code that
+shouldn't be reached. In non debug builds is defined as a hint for
+the compiler to eliminate any code after it, so it is useful also for
+performance reasons, but should be used with care because if it is
+ever reached will trigger Undefined Behaviour and if you are lucky a
+crash. In debug builds will report the location where it was trigered
+and crash. */
+
 #define PCRE2_UNREACHABLE() do                                      \
 {                                                                   \
 fprintf(stderr, "Execution reached unexpected point at " __FILE__   \
                 ":%d\n", __LINE__);                                 \
 abort();                                                            \
 } while(0)
+
+/* PCRE2_DEBUG_UNREACHABLE() is a debug only version of the previous
+macro. It is meant to be used in places where the code is handling
+an error situation in code that shouldn't be reached, but that has
+some sort of fallback code to normally handle the error. When in
+doubt you should use this instead of the previous macro. */
+
 #define PCRE2_DEBUG_UNREACHABLE() PCRE2_UNREACHABLE()
 
 #endif /* PCRE2_DEBUG */

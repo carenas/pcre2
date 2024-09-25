@@ -1158,7 +1158,7 @@ for (int i = 0; i < 2; i++)
   }
 
 /* Something went terribly wrong. Trigger and assert and return an error */
-PCRE2_ASSERT(0);
+PCRE2_DEBUG_UNREACHABLE();
 
 EXIT:
 
