@@ -1157,7 +1157,7 @@ for (int i = 0; i < 2; i++)
   use_length = *bufflenptr + 1;
   }
 
-/* Something went terribly wrong. Trigger and assert and return an error */
+/* Something went terribly wrong. Trigger an assert and return an error */
 PCRE2_DEBUG_UNREACHABLE();
 
 EXIT:

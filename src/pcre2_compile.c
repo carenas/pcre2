@@ -9385,7 +9385,8 @@ for (;; pptr++)
     if (meta < META_END) continue;  /* Literal */
     break;
 
-    /* This should never occur. */
+    /* The parsed regex is malformed; we have reached the end and did
+     * not find the end of the construct which we are skipping over. */
 
     case META_END:
     PCRE2_DEBUG_UNREACHABLE();
