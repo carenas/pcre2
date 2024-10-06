@@ -188,3 +188,41 @@ jobs:
           cd ..
           perl -v
           maint/RunPerlTest
+
+  duck:
+    name: release
+    runs-on: ubuntu-latest
+    container: alpine:edge
+    steps:
+      - name: Setup
+        run: |
+          echo "@testing https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+          apk add --no-cache automake autoconf libtool make musl-dev
+          apk add --no-cache cmake git zig
+          apk add --no-cache tcc@testing
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: yes
+
+      - name: Prepare
+        env:
+          CC: zig cc
+        run: |
+          git config --global --add safe.directory /__w/pcre2/pcre2
+          zig build
+          git clean -fxd
+          cmake -B build -DCMAKE_UNITY_BUILD=ON
+          cmake --build build
+          git clean -fxd
+          ./autogen.sh
+
+      - name: Configure
+        run: ./configure CC="zig cc"
+
+      - name: Build
+        run: make distcheck
+
+      - name: Test
+        run: make check

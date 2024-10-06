@@ -10,6 +10,7 @@ build/
 *.pc
 *.o
 *~
+.*.swp
 
 *-coverage*
 
