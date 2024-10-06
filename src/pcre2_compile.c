@@ -666,7 +666,8 @@ are allowed. */
    PCRE2_NO_DOTSTAR_ANCHOR|PCRE2_UCP|PCRE2_UNGREEDY)
 
 #define PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS \
-   (PCRE2_EXTRA_MATCH_LINE|PCRE2_EXTRA_MATCH_WORD|PCRE2_EXTRA_CASELESS_RESTRICT)
+   (PCRE2_EXTRA_MATCH_LINE|PCRE2_EXTRA_MATCH_WORD| \
+    PCRE2_EXTRA_CASELESS_RESTRICT|PCRE2_EXTRA_TURKISH_CASING)
 
 #define PUBLIC_COMPILE_EXTRA_OPTIONS \
    (PUBLIC_LITERAL_COMPILE_EXTRA_OPTIONS| \
@@ -2811,7 +2812,7 @@ the main compiling phase. */
 
 #define PARSE_TRACKED_EXTRA_OPTIONS (PCRE2_EXTRA_CASELESS_RESTRICT| \
   PCRE2_EXTRA_ASCII_BSD|PCRE2_EXTRA_ASCII_BSS|PCRE2_EXTRA_ASCII_BSW| \
-  PCRE2_EXTRA_ASCII_DIGIT|PCRE2_EXTRA_ASCII_POSIX)
+  PCRE2_EXTRA_ASCII_DIGIT|PCRE2_EXTRA_ASCII_POSIX|PCRE2_EXTRA_TURKISH_CASING)
 
 /* States used for analyzing ranges in character classes. The two OK values
 must be last. */
@@ -4346,13 +4347,14 @@ while (ptr < ptrend)
         xset = xunset = 0;
         xoptset = &xset;
 
-        /* ^ at the start unsets irmnsx and disables the subsequent use of - */
+        /* ^ at the start unsets irmnstx and disables the subsequent use of - */
 
         if (ptr < ptrend && *ptr == CHAR_CIRCUMFLEX_ACCENT)
           {
           options &= ~(PCRE2_CASELESS|PCRE2_MULTILINE|PCRE2_NO_AUTO_CAPTURE|
                        PCRE2_DOTALL|PCRE2_EXTENDED|PCRE2_EXTENDED_MORE);
-          xoptions &= ~(PCRE2_EXTRA_CASELESS_RESTRICT);
+          xoptions &= ~(PCRE2_EXTRA_CASELESS_RESTRICT|
+                        PCRE2_EXTRA_TURKISH_CASING);
           hyphenok = FALSE;
           ptr++;
           }
@@ -4425,6 +4427,7 @@ while (ptr < ptrend)
             case CHAR_n: *optset |= PCRE2_NO_AUTO_CAPTURE; break;
             case CHAR_r: *xoptset|= PCRE2_EXTRA_CASELESS_RESTRICT; break;
             case CHAR_s: *optset |= PCRE2_DOTALL; break;
+            case CHAR_t: *xoptset|= PCRE2_EXTRA_TURKISH_CASING; break;
             case CHAR_U: *optset |= PCRE2_UNGREEDY; break;
 
             /* If x appears twice it sets the extended extended option. */

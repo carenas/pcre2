@@ -302,7 +302,10 @@ ASCII characters, K and S, that, in addition to their lower case ASCII
 equivalents, are case-equivalent with Unicode U+212A (Kelvin sign) and U+017F
 (long S) respectively when either PCRE2_UTF or PCRE2_UCP is set, unless the
 PCRE2_EXTRA_CASELESS_RESTRICT option is in force (either passed to
-<b>pcre2_compile()</b> or set by (?r) within the pattern).
+<b>pcre2_compile()</b> or set by (?r) within the pattern). If the
+PCRE2_EXTRA_TURKISH_CASING option is in force (either passed to
+<b>pcre2_compile()</b> or set by (?t) within the pattern), then the 'i' letters
+are matched according to Turkish and Azeri languages.
 </P>
 <P>
 The power of regular expressions comes from the ability to include wild cards,
@@ -1734,11 +1737,12 @@ pairs or individual letters:
   aT for PCRE2_EXTRA_ASCII_DIGIT
   r  for PCRE2_EXTRA_CASELESS_RESTRICT
   J  for PCRE2_DUPNAMES
+  t  for PCRE2_EXTRA_TURKISH_CASING
   U  for PCRE2_UNGREEDY
 </pre>
-However, except for 'r', these are not unset by (?^), which is equivalent to
-(?-imnrsx). If 'a' is not followed by any of the upper case letters shown
-above, it sets (or unsets) all the ASCII options.
+However, except for 'r' and 't', these are not unset by (?^), which is
+equivalent to (?-imnrstx). If 'a' is not followed by any of the upper case
+letters shown above, it sets (or unsets) all the ASCII options.
 </P>
 <P>
 PCRE2_EXTRA_ASCII_DIGIT has no additional effect when PCRE2_EXTRA_ASCII_POSIX

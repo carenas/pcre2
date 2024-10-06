@@ -447,6 +447,7 @@ if ((options & PCRE2_CASELESS) && (options & (PCRE2_UTF|PCRE2_UCP)))
 
 if (xoptions & PCRE2_EXTRA_CASELESS_RESTRICT)
   class_options |= PARSE_CLASS_RESTRICTED_UTF;
+// XXX do we need a Turkish option?
 #endif
 
 /* Compute required space for the range. */
