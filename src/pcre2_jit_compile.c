@@ -1181,8 +1181,15 @@ while (cc < ccend)
     cc += 1 + IMM2_SIZE;
     break;
 
-    case OP_DNREF:
     case OP_DNREFI:
+#ifdef SUPPORT_UNICODE
+    if (common->iref_ptr == 0)
+      {
+      common->iref_ptr = common->ovector_start;
+      common->ovector_start += 3 * sizeof(sljit_sw);
+      }
+#endif /* SUPPORT_UNICODE */
+    case OP_DNREF:
     case OP_DNCREF:
     count = GET2(cc, 1 + IMM2_SIZE);
     slot = common->name_table + GET2(cc, 1) * common->name_entry_size;
@@ -9424,6 +9431,10 @@ jump_list *no_match = NULL;
 int source_reg = COUNT_MATCH;
 int source_end_reg = ARGUMENTS;
 int char1_reg = STACK_LIMIT;
+PCRE2_UCHAR refi_flag = 0;
+
+if (*cc == OP_REFI || *cc == OP_DNREFI)
+  refi_flag = cc[PRIV(OP_lengths)[*cc] - 1];
 #endif /* SUPPORT_UNICODE */
 
 if (ref)
@@ -9438,7 +9449,7 @@ else
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), 0);
 
 #if defined SUPPORT_UNICODE
-if (common->utf && *cc == OP_REFI)
+if (common->utf && (*cc == OP_REFI || *cc == OP_DNREFI))
   {
   SLJIT_ASSERT(common->iref_ptr != 0);
 
@@ -9491,6 +9502,8 @@ if (common->utf && *cc == OP_REFI)
   OP2(SLJIT_ADD, TMP1, 0, TMP1, 0, TMP3, 0);
   CMPTO(SLJIT_EQUAL, TMP1, 0, char1_reg, 0, loop);
 
+  if (refi_flag & REFI_FLAG_CASELESS_RESTRICT)
+    add_jump(compiler, &no_match, CMP(SLJIT_LESS, char1_reg, 0, SLJIT_IMM, 128));
   add_jump(compiler, &no_match, CMP(SLJIT_EQUAL, TMP2, 0, SLJIT_IMM, 0));
   OP2(SLJIT_SHL, TMP2, 0, TMP2, 0, SLJIT_IMM, 2);
   OP2(SLJIT_ADD, TMP2, 0, TMP2, 0, SLJIT_IMM, (sljit_sw)PRIV(ucd_caseless_sets));
@@ -9594,6 +9607,7 @@ if (ref)
   offset = GET2(cc, 1) << 1;
 else
   cc += IMM2_SIZE;
+
 if (*ccbegin == OP_REFI || *ccbegin == OP_DNREFI)
   cc += 1;
 type = cc[1 + IMM2_SIZE];
