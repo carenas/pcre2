@@ -1189,6 +1189,7 @@ while (cc < ccend)
       common->ovector_start += 3 * sizeof(sljit_sw);
       }
 #endif /* SUPPORT_UNICODE */
+    /* fallthrough */
     case OP_DNREF:
     case OP_DNCREF:
     count = GET2(cc, 1 + IMM2_SIZE);
