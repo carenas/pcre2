@@ -1149,7 +1149,7 @@ while (cc < ccend)
     /* Fall through. */
     case OP_REF:
     common->optimized_cbracket[GET2(cc, 1)] = 0;
-    cc += 1 + IMM2_SIZE;
+    cc += PRIV(OP_lengths)[*cc];
     break;
 
     case OP_ASSERT_NA:
@@ -1191,7 +1191,7 @@ while (cc < ccend)
       common->optimized_cbracket[GET2(slot, 0)] = 0;
       slot += common->name_entry_size;
       }
-    cc += 1 + 2 * IMM2_SIZE;
+    cc += PRIV(OP_lengths)[*cc];
     break;
 
     case OP_RECURSE:
@@ -9594,6 +9594,8 @@ if (ref)
   offset = GET2(cc, 1) << 1;
 else
   cc += IMM2_SIZE;
+if (*ccbegin == OP_REFI || *ccbegin == OP_DNREFI)
+  cc += 1;
 type = cc[1 + IMM2_SIZE];
 
 SLJIT_COMPILE_ASSERT((OP_CRSTAR & 0x1) == 0, crstar_opcode_must_be_even);
@@ -12687,25 +12689,31 @@ while (cc < ccend)
 
     case OP_REF:
     case OP_REFI:
-    if (cc[1 + IMM2_SIZE] >= OP_CRSTAR && cc[1 + IMM2_SIZE] <= OP_CRPOSRANGE)
+    {
+    int op_len = PRIV(OP_lengths)[*cc];
+    if (cc[op_len] >= OP_CRSTAR && cc[op_len] <= OP_CRPOSRANGE)
       cc = compile_ref_iterator_matchingpath(common, cc, parent);
     else
       {
       compile_ref_matchingpath(common, cc, parent->top != NULL ? &parent->top->simple_backtracks : &parent->own_backtracks, TRUE, FALSE);
-      cc += 1 + IMM2_SIZE;
+      cc += op_len;
       }
+    }
     break;
 
     case OP_DNREF:
     case OP_DNREFI:
-    if (cc[1 + 2 * IMM2_SIZE] >= OP_CRSTAR && cc[1 + 2 * IMM2_SIZE] <= OP_CRPOSRANGE)
+    {
+    int op_len = PRIV(OP_lengths)[*cc];
+    if (cc[op_len] >= OP_CRSTAR && cc[op_len] <= OP_CRPOSRANGE)
       cc = compile_ref_iterator_matchingpath(common, cc, parent);
     else
       {
       compile_dnref_search(common, cc, parent->top != NULL ? &parent->top->simple_backtracks : &parent->own_backtracks);
       compile_ref_matchingpath(common, cc, parent->top != NULL ? &parent->top->simple_backtracks : &parent->own_backtracks, TRUE, FALSE);
-      cc += 1 + 2 * IMM2_SIZE;
+      cc += op_len;
       }
+    }
     break;
 
     case OP_RECURSE:
@@ -12992,7 +13000,7 @@ PCRE2_SPTR cc = current->cc;
 BOOL ref = (*cc == OP_REF || *cc == OP_REFI);
 PCRE2_UCHAR type;
 
-type = cc[ref ? 1 + IMM2_SIZE : 1 + 2 * IMM2_SIZE];
+type = cc[PRIV(OP_lengths)[*cc]];
 
 if ((type & 0x1) == 0)
   {

@@ -639,6 +639,9 @@ generates OP_DNREF or OP_DNREFI. These are followed by two counts: the index
 required name, followed by the number of groups with the same name. The
 matching code can then search for the first one that is set.
 
+OP_REFI and OP_DNREFI are further followed by an item containing any
+case-insensitivity flags.
+
 
 Repeating character classes and back references
 -----------------------------------------------
