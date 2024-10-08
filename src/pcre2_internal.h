@@ -1911,8 +1911,9 @@ typedef struct {
 #define UCD_BIDICLASS(ch)   UCD_BIDICLASS_PROP(GET_UCD(ch))
 #define UCD_ANY_I(ch) \
   /* match any of the four characters 'i', 'I', U+0130, U+0131 */ \
-  (((ch) & ~0x20) == 0x49 || ((ch) & ~1) == 0x0130)
-#define UCD_DOTTED_I(ch)    ((ch) == 0x69 || (ch) == 0x0130)
+  (((uint32_t)(ch) & ~0x20u) == 0x49u || ((uint32_t)(ch) & ~1u) == 0x0130u)
+#define UCD_DOTTED_I(ch) \
+  ((uint32_t)(ch) == 0x69u || (uint32_t)(ch) == 0x0130u)
 
 /* The "scriptx" and bprops fields contain offsets into vectors of 32-bit words
 that form a bitmap representing a list of scripts or boolean properties. These
