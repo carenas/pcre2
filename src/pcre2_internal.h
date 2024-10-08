@@ -1911,7 +1911,7 @@ typedef struct {
 #define UCD_BIDICLASS(ch)   UCD_BIDICLASS_PROP(GET_UCD(ch))
 #define UCD_ANY_I(ch) \
   /* match any of the four characters 'i', 'I', U+0130, U+0131 */ \
-  (((uint32_t)(ch) & ~0x20u) == 0x49u || ((uint32_t)(ch) & ~1u) == 0x0130u)
+  (((uint32_t)(ch) | 0x20u) == 0x69u || ((uint32_t)(ch) | 1u) == 0x0131u)
 #define UCD_DOTTED_I(ch) \
   ((uint32_t)(ch) == 0x69u || (uint32_t)(ch) == 0x0130u)
 
