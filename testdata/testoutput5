@@ -5312,6 +5312,259 @@ No match
 
 # End caseless restrict tests
 
+# TESTS for PCRE2_EXTRA_TURKISH_CASING - again, tests with and without.
+
+/i/i,utf
+    i
+ 0: i
+    I
+ 0: I
+    \x{0130}
+No match
+    \x{0131}
+No match
+
+/i/i,utf,turkish_casing
+    i
+ 0: i
+    I
+No match
+    \x{0130}
+ 0: \x{130}
+    \x{0131}
+No match
+
+/I/i,utf
+    i
+ 0: i
+    I
+ 0: I
+    \x{0130}
+No match
+    \x{0131}
+No match
+
+/I/i,utf,turkish_casing
+    i
+No match
+    I
+ 0: I
+    \x{0130}
+No match
+    \x{0131}
+ 0: \x{131}
+
+/\x{0130}/i,utf
+    i
+No match
+    I
+No match
+    \x{0130}
+ 0: \x{130}
+    \x{0131}
+No match
+
+/\x{0130}/i,utf,turkish_casing
+    i
+ 0: i
+    I
+No match
+    \x{0130}
+ 0: \x{130}
+    \x{0131}
+No match
+
+/\x{0131}/i,utf
+    i
+No match
+    I
+No match
+    \x{0130}
+No match
+    \x{0131}
+ 0: \x{131}
+
+/\x{0131}/i,utf,turkish_casing
+    i
+No match
+    I
+ 0: I
+    \x{0130}
+No match
+    \x{0131}
+ 0: \x{131}
+
+/[i]/i,utf
+    i
+ 0: i
+    I
+ 0: I
+    \x{0130}
+No match
+    \x{0131}
+No match
+
+/[i]/i,utf,turkish_casing
+    i
+ 0: i
+    I
+No match
+    \x{0130}
+ 0: \x{130}
+    \x{0131}
+No match
+
+/[\x{0130}]/i,utf
+    i
+No match
+    I
+No match
+    \x{0130}
+ 0: \x{130}
+    \x{0131}
+No match
+
+/[\x{0130}]/i,utf,turkish_casing
+    i
+ 0: i
+    I
+No match
+    \x{0130}
+ 0: \x{130}
+    \x{0131}
+No match
+
+/[\x{0120}-\x{0130}]/i,utf
+    i
+No match
+    I
+No match
+    \x{0130}
+ 0: \x{130}
+    \x{0131}
+No match
+
+/[\x{0120}-\x{0130}]/i,utf,turkish_casing
+    i
+ 0: i
+    I
+No match
+    \x{0130}
+ 0: \x{130}
+    \x{0131}
+No match
+
+/[zi]/i,utf
+    i
+ 0: i
+    I
+ 0: I
+    \x{0130}
+No match
+    \x{0131}
+No match
+
+/[zi]/i,utf,turkish_casing
+    i
+ 0: i
+    I
+No match
+    \x{0130}
+ 0: \x{130}
+    \x{0131}
+No match
+
+/[z\x{0130}]/i,utf
+    i
+No match
+    I
+No match
+    \x{0130}
+ 0: \x{130}
+    \x{0131}
+No match
+
+/[z\x{0130}]/i,utf,turkish_casing
+    i
+ 0: i
+    I
+No match
+    \x{0130}
+ 0: \x{130}
+    \x{0131}
+No match
+
+/[iI]/i,utf
+    i
+ 0: i
+    I
+ 0: I
+    \x{0130}
+No match
+    \x{0131}
+No match
+
+/[iI]/i,utf,turkish_casing
+    i
+ 0: i
+    I
+ 0: I
+    \x{0130}
+ 0: \x{130}
+    \x{0131}
+ 0: \x{131}
+
+/[i\x{0130}]/i,utf
+    i
+ 0: i
+    I
+ 0: I
+    \x{0130}
+ 0: \x{130}
+    \x{0131}
+No match
+
+/[i\x{0130}]/i,utf,turkish_casing
+    i
+ 0: i
+    I
+No match
+    \x{0130}
+ 0: \x{130}
+    \x{0131}
+No match
+
+/(.) \1/i,utf
+    i I
+ 0: i I
+ 1: i
+    i \x{0130}
+No match
+    \x{0131} I
+No match
+
+/(.) (?t:\1)/i,utf
+    i I
+No match
+    i \x{0130}
+ 0: i \x{130}
+ 1: i
+    \x{0131} I
+ 0: \x{131} I
+ 1: \x{131}
+
+/(.) \1/i,utf,turkish_casing
+    i I
+No match
+    i \x{0130}
+ 0: i \x{130}
+ 1: i
+    \x{0131} I
+ 0: \x{131} I
+ 1: \x{131}
+
+# End Turkish casing tests
+
 # TESTS for PCRE2_EXTRA_ASCII_xxx - again, tests with and without.
 
 # DIGITS

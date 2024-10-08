@@ -1832,6 +1832,7 @@ in UTF-8 mode. The code that uses this table must know about such things. */
 /* Constants used by OP_REFI and OP_DNREFI to control matching behaviour. */
 
 #define REFI_FLAG_CASELESS_RESTRICT  0x1
+#define REFI_FLAG_TURKISH_CASING     0x2
 
 
 /* ---------- Private structures that are mode-independent. ---------- */
@@ -1910,7 +1911,8 @@ typedef struct {
 #define UCD_BIDICLASS(ch)   UCD_BIDICLASS_PROP(GET_UCD(ch))
 #define UCD_ANY_I(ch) \
   /* match any of the four characters 'i', 'I', U+0130, U+0131 */ \
-  ((ch & ~0x20) == 0x49 || (ch & ~1) == 0x0130)
+  (((ch) & ~0x20) == 0x49 || ((ch) & ~1) == 0x0130)
+#define UCD_DOTTED_I(ch)    ((ch) == 0x69 || (ch) == 0x0130)
 
 /* The "scriptx" and bprops fields contain offsets into vectors of 32-bit words
 that form a bitmap representing a list of scripts or boolean properties. These
@@ -1976,6 +1978,8 @@ extern const uint8_t          PRIV(utf8_table4)[];
 #define _pcre2_vspace_list             PCRE2_SUFFIX(_pcre2_vspace_list_)
 #define _pcre2_ucd_boolprop_sets       PCRE2_SUFFIX(_pcre2_ucd_boolprop_sets_)
 #define _pcre2_ucd_caseless_sets       PCRE2_SUFFIX(_pcre2_ucd_caseless_sets_)
+#define _pcre2_ucd_turkish_dotted_i_caseset  PCRE2_SUFFIX(_pcre2_ucd_turkish_dotted_i_caseset_)
+#define _pcre2_ucd_turkish_dotless_i_caseset PCRE2_SUFFIX(_pcre2_ucd_turkish_dotless_i_caseset_)
 #define _pcre2_ucd_nocase_ranges       PCRE2_SUFFIX(_pcre2_ucd_nocase_ranges_)
 #define _pcre2_ucd_nocase_ranges_size  PCRE2_SUFFIX(_pcre2_ucd_nocase_ranges_size_)
 #define _pcre2_ucd_digit_sets          PCRE2_SUFFIX(_pcre2_ucd_digit_sets_)
@@ -2002,6 +2006,8 @@ extern const uint32_t                  PRIV(hspace_list)[];
 extern const uint32_t                  PRIV(vspace_list)[];
 extern const uint32_t                  PRIV(ucd_boolprop_sets)[];
 extern const uint32_t                  PRIV(ucd_caseless_sets)[];
+extern const uint32_t                  PRIV(ucd_turkish_dotted_i_caseset);
+extern const uint32_t                  PRIV(ucd_turkish_dotless_i_caseset);
 extern const uint32_t                  PRIV(ucd_nocase_ranges)[];
 extern const uint32_t                  PRIV(ucd_nocase_ranges_size);
 extern const uint32_t                  PRIV(ucd_digit_sets)[];

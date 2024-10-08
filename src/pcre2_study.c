@@ -835,6 +835,8 @@ if (caseless)
 #endif
     }
 
+    // XXX ^^^ does this need tweaking for Turkish too?
+
   else
 #endif  /* SUPPORT_UNICODE */
 

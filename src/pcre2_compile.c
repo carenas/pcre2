@@ -5296,7 +5296,7 @@ restriction is in force). Sometimes we can just extend the original range. */
 
 if ((options & PCRE2_CASELESS) != 0)
   {
-#ifndef SUPPORT_UNICODE
+#ifdef SUPPORT_UNICODE
   if ((options & (PCRE2_UTF|PCRE2_UCP)) == 0)
 #endif  /* SUPPORT_UNICODE */
     /* Not UTF mode */
@@ -5739,8 +5739,10 @@ for (;; pptr++)
     /* ===================================================================*/
     /* Empty character classes are allowed if PCRE2_ALLOW_EMPTY_CLASS is set.
     Otherwise, an initial ']' is taken as a data character. When empty classes
-    are allowed, [] must always fail, so generate OP_FAIL, whereas [^] must
-    match any character, so generate OP_ALLANY. */
+    are allowed, [] must generate an empty class - we have no dedicated opcode
+    to optimise the representation, but it's a rare (and useless?) case. The
+    empty-negated [^] matches any character, so is useful: generate
+    OP_ALLANY. */
 
     case META_CLASS_EMPTY:
     case META_CLASS_EMPTY_NOT:
@@ -5788,9 +5790,6 @@ for (;; pptr++)
 
     if (pptr[1] < META_END && pptr[2] == META_CLASS_END)
       {
-#ifdef SUPPORT_UNICODE
-      uint32_t d;
-#endif
       uint32_t c = pptr[1];
 
       pptr += 2;                 /* Move on to class end */
@@ -5811,18 +5810,34 @@ for (;; pptr++)
       /* For caseless UTF or UCP mode, check whether this character has more
       than one other case. If so, generate a special OP_NOTPROP item instead of
       OP_NOTI. When restricted by PCRE2_EXTRA_CASELESS_RESTRICT, ignore any
-      caseless set that starts with an ASCII character. */
+      caseless set that starts with an ASCII character. If the character is
+      affected by the special Turkish rules, hardcode the not-matching
+      characters using a caseset. */
 
 #ifdef SUPPORT_UNICODE
-      if ((utf||ucp) && (options & PCRE2_CASELESS) != 0 &&
-          (d = UCD_CASESET(c)) != 0 &&
-          ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) == 0 ||
-          PRIV(ucd_caseless_sets)[d] > 127))
+      if ((utf||ucp) && (options & PCRE2_CASELESS) != 0)
         {
-        *code++ = OP_NOTPROP;
-        *code++ = PT_CLIST;
-        *code++ = d;
-        break;   /* We are finished with this class */
+        uint32_t caseset;
+
+        if ((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0 && UCD_ANY_I(c))
+          {
+          *code++ = OP_NOTPROP;
+          *code++ = PT_CLIST;
+          *code++ = UCD_DOTTED_I(meta)? PRIV(ucd_turkish_dotted_i_caseset) :
+              PRIV(ucd_turkish_dotless_i_caseset);
+          break;   /* We are finished with this class */
+          }
+
+        caseset = UCD_CASESET(c);
+        if (caseset != 0 &&
+              ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) == 0 ||
+               PRIV(ucd_caseless_sets)[caseset] > 127))
+          {
+          *code++ = OP_NOTPROP;
+          *code++ = PT_CLIST;
+          *code++ = caseset;
+          break;   /* We are finished with this class */
+          }
         }
 #endif
       /* Char has only one other (usable) case, or UCP not available */
@@ -5837,7 +5852,8 @@ for (;; pptr++)
     they are case partners. This can be optimized to generate a caseless single
     character match (which also sets first/required code units if relevant).
     When casing restrictions apply, ignore a caseless set if both characters
-    are ASCII. */
+    are ASCII. When Turkish casing applies, an 'i' does not match its normal
+    Unicode "othercase". */
 
     if (meta == META_CLASS && pptr[1] < META_END && pptr[2] < META_END &&
         pptr[3] == META_CLASS_END)
@@ -5845,9 +5861,10 @@ for (;; pptr++)
       uint32_t c = pptr[1];
 
 #ifdef SUPPORT_UNICODE
-      if (UCD_CASESET(c) == 0 ||
-         ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0 &&
-         c < 128 && pptr[2] < 128))
+      if ((UCD_CASESET(c) == 0 ||
+           ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0 &&
+            c < 128 && pptr[2] < 128)) &&
+          !((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0 && UCD_ANY_I(c)))
 #endif
         {
         uint32_t d;
@@ -7192,8 +7209,10 @@ for (;; pptr++)
       PUT2INC(code, 0, index);
       PUT2INC(code, 0, count);
       if ((options & PCRE2_CASELESS) != 0)
-        *code++ = ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0)?
-            REFI_FLAG_CASELESS_RESTRICT : 0;
+        *code++ = (((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0)?
+            REFI_FLAG_CASELESS_RESTRICT : 0) |
+                  (((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0)?
+            REFI_FLAG_TURKISH_CASING : 0);
       }
     break;
 
@@ -8149,8 +8168,10 @@ for (;; pptr++)
     *code++ = ((options & PCRE2_CASELESS) != 0)? OP_REFI : OP_REF;
     PUT2INC(code, 0, meta_arg);
     if ((options & PCRE2_CASELESS) != 0)
-      *code++ = ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0)?
-          REFI_FLAG_CASELESS_RESTRICT : 0;
+      *code++ = (((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0)?
+          REFI_FLAG_CASELESS_RESTRICT : 0) |
+                (((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0)?
+          REFI_FLAG_TURKISH_CASING : 0);
 
     /* Update the map of back references, and keep the highest one. We
     could do this in parse_regex() for numerical back references, but not
@@ -8346,12 +8367,26 @@ for (;; pptr++)
     /* For caseless UTF or UCP mode, check whether this character has more than
     one other case. If so, generate a special OP_PROP item instead of OP_CHARI.
     When casing restrictions apply, ignore caseless sets that start with an
-    ASCII character. */
+    ASCII character. If the character is affected by the special Turkish rules,
+    hardcode the matching characters using a caseset. */
 
 #ifdef SUPPORT_UNICODE
     if ((utf||ucp) && (options & PCRE2_CASELESS) != 0)
       {
-      uint32_t caseset = UCD_CASESET(meta);
+      uint32_t caseset;
+
+      if ((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0 && UCD_ANY_I(meta))
+        {
+        *code++ = OP_PROP;
+        *code++ = PT_CLIST;
+        *code++ = UCD_DOTTED_I(meta)? PRIV(ucd_turkish_dotted_i_caseset) :
+            PRIV(ucd_turkish_dotless_i_caseset);
+        if (firstcuflags == REQ_UNSET)
+          firstcuflags = zerofirstcuflags = REQ_NONE;
+        break;  /* End handling this meta item */
+        }
+
+      caseset = UCD_CASESET(meta);
       if (caseset != 0 &&
            ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) == 0 ||
            PRIV(ucd_caseless_sets)[caseset] > 127))
@@ -11045,8 +11080,8 @@ if ((optim_flags & PCRE2_OPTIM_START_OPTIMIZE) != 0)
         }
 
       /* The first code unit is > 128 in UTF or UCP mode, or > 255 otherwise.
-      In 8-bit UTF mode, codepoints in the range 128-255 are introductory code
-      points and cannot have another case, but if UCP is set they may do. */
+      In 8-bit UTF mode, code units in the range 128-255 are introductory code
+      units and cannot have another case, but if UCP is set they may do. */
 
 #ifdef SUPPORT_UNICODE
 #if PCRE2_CODE_UNIT_WIDTH == 8
