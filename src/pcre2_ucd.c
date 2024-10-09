@@ -142,8 +142,8 @@ const uint32_t PRIV(ucd_caseless_sets)[] = {
   0x004b,  0x006b,  0x212a,  NOTACHAR,
   0x00c5,  0x00e5,  0x212b,  NOTACHAR,
   0x1c88,  0xa64a,  0xa64b,  NOTACHAR,
-  0x0069,  0x0130,  NOTACHAR,
   0x0049,  0x0131,  NOTACHAR,
+  0x0069,  0x0130,  NOTACHAR,
 };
 
 /* These are the indices, within ucd_caseless_sets, of the additional

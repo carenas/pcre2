@@ -266,6 +266,9 @@ MAX_LIST = 8             # keep on sync with the value in pcre2_auto_possess.c
 MAX_UNICODE = 0x110000
 NOTACHAR = 0xffffffff
 
+# Globals
+
+turkish_caseless_sets = []         # Collected from CaseFolding.txt
 
 # ---------------------------------------------------------------------------
 #                         DEFINE FUNCTIONS
@@ -292,6 +295,8 @@ def get_bidi(chardata):
 def get_other_case(chardata):
   if chardata[1] == 'C' or chardata[1] == 'S':
     return int(chardata[2], 16) - int(chardata[0], 16)
+  elif chardata[1] == 'T':
+    turkish_caseless_sets.append([int(chardata[0], 16), int(chardata[2], 16)])
   return None
 
 
@@ -345,7 +350,8 @@ def read_table(file_name, get_value, default_value):
       last = int(m.group(3), 16)
     for i in range(char, last + 1):
       if file_base == 'CaseFolding' and table[i] != default_value:
-        print("WARNING: multiple rules for other_case[0x{:X}]".format(i))
+        print("WARNING: multiple rules for other_case[0x{:X}]".format(i),
+              file=sys.stderr)
       table[i] = value
 
   file.close()
@@ -737,12 +743,23 @@ for s in caseless_sets:
     if x > 127 and x + other_case[x] < 128:
       other_case[x] = 0  
 
-# Append a couple of extra caseless sets (unreferenced by the record objects)
+# Append extra Turkish caseless sets (unreferenced by the record objects)
 # to hold the optional Turkish case equivalences.
-turkish_dotted_i_index = offset
-turkish_dotless_i_index = offset + 3
-caseless_sets.append([0x69, 0x0130])
-caseless_sets.append([0x49, 0x0131])
+
+turkish_other_case = set()
+for s in turkish_caseless_sets:
+  l = len(s)
+  if l != 2:
+    print("WARNING: unexpected Turkish caseless set", file=sys.stderr)
+  s.sort()
+  caseless_sets.append(s)
+  k = s[l-1]
+  turkish_other_case.add(k)
+  if k == 0x130:
+    turkish_dotless_i_index = offset
+  elif k == 0x131:
+    turkish_dotted_i_index = offset
+  offset += l + 1
 
 # Combine all the tables
 
@@ -898,7 +915,7 @@ expected_size = 8
 total = 0
 
 for c in range(1, MAX_UNICODE):
-  if other_case[c] != 0 or c in [0x0130, 0x0131]: # add the two chars that gain casing in Turkish
+  if other_case[c] != 0 or c in turkish_other_case:
     if c - range_start > expected_size:
       range_size = c - range_start - 1
       f.write('  0x%04x, 0x%04x, /* %d */\n' % (range_start, c, range_size))
