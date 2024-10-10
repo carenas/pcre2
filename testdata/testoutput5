@@ -5565,7 +5565,7 @@ No match
     \x{0131} I
 No match
 
-/(.) (?t:\1)/i,utf
+/(*TURKISH_CASING)(.) \1/i,utf
     i \x{0130}
  0: i \x{130}
  1: i

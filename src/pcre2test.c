@@ -885,7 +885,6 @@ static c1modstruct c1modlist[] = {
   { "no_auto_capture",   'n',           -1 },
   { "caseless_restrict", 'r',           -1 },
   { "dotall",            's',           -1 },
-  { "turkish_casing",    't',           -1 },
   { "extended",          'x',           -1 }
 };
 

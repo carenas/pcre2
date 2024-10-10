@@ -684,6 +684,7 @@ compatibility, (*UTFn) is supported in the relevant libraries, but (*UTF) is
 generic and always supported. */
 
 enum { PSO_OPT,     /* Value is an option bit */
+       PSO_XOPT,    /* Value is an xoption bit */
        PSO_FLG,     /* Value is a flag bit */
        PSO_NL,      /* Value is a newline type */
        PSO_BSR,     /* Value is a \R type */
@@ -712,6 +713,7 @@ static const pso pso_list[] = {
   { STRING_NO_DOTSTAR_ANCHOR_RIGHTPAR, 18, PSO_OPTMZ, PCRE2_OPTIM_DOTSTAR_ANCHOR },
   { STRING_NO_JIT_RIGHTPAR,             7, PSO_FLG, PCRE2_NOJIT },
   { STRING_NO_START_OPT_RIGHTPAR,      13, PSO_OPTMZ, PCRE2_OPTIM_START_OPTIMIZE },
+  { STRING_TURKISH_CASING_RIGHTPAR,    15, PSO_XOPT, PCRE2_EXTRA_TURKISH_CASING },
   { STRING_LIMIT_HEAP_EQ,              11, PSO_LIMH, 0 },
   { STRING_LIMIT_MATCH_EQ,             12, PSO_LIMM, 0 },
   { STRING_LIMIT_DEPTH_EQ,             12, PSO_LIMD, 0 },
@@ -2812,7 +2814,7 @@ the main compiling phase. */
 
 #define PARSE_TRACKED_EXTRA_OPTIONS (PCRE2_EXTRA_CASELESS_RESTRICT| \
   PCRE2_EXTRA_ASCII_BSD|PCRE2_EXTRA_ASCII_BSS|PCRE2_EXTRA_ASCII_BSW| \
-  PCRE2_EXTRA_ASCII_DIGIT|PCRE2_EXTRA_ASCII_POSIX|PCRE2_EXTRA_TURKISH_CASING)
+  PCRE2_EXTRA_ASCII_DIGIT|PCRE2_EXTRA_ASCII_POSIX)
 
 /* States used for analyzing ranges in character classes. The two OK values
 must be last. */
@@ -2836,8 +2838,8 @@ be quantified. */
 
 /* Here's the actual function. */
 
-static int parse_regex(PCRE2_SPTR ptr, uint32_t options, BOOL *has_lookbehind,
-  compile_block *cb)
+static int parse_regex(PCRE2_SPTR ptr, uint32_t options, uint32_t xoptions,
+  BOOL *has_lookbehind, compile_block *cb)
 {
 uint32_t c;
 uint32_t delimiter;
@@ -2852,7 +2854,6 @@ uint32_t *this_parsed_item = NULL;
 uint32_t *prev_parsed_item = NULL;
 uint32_t meta_quantifier = 0;
 uint32_t add_after_mark = 0;
-uint32_t xoptions = cb->cx->extra_options;
 uint16_t nest_depth = 0;
 int after_manual_callout = 0;
 int expect_cond_assert = 0;
@@ -4347,14 +4348,13 @@ while (ptr < ptrend)
         xset = xunset = 0;
         xoptset = &xset;
 
-        /* ^ at the start unsets irmnstx and disables the subsequent use of - */
+        /* ^ at the start unsets irmnsx and disables the subsequent use of - */
 
         if (ptr < ptrend && *ptr == CHAR_CIRCUMFLEX_ACCENT)
           {
           options &= ~(PCRE2_CASELESS|PCRE2_MULTILINE|PCRE2_NO_AUTO_CAPTURE|
                        PCRE2_DOTALL|PCRE2_EXTENDED|PCRE2_EXTENDED_MORE);
-          xoptions &= ~(PCRE2_EXTRA_CASELESS_RESTRICT|
-                        PCRE2_EXTRA_TURKISH_CASING);
+          xoptions &= ~(PCRE2_EXTRA_CASELESS_RESTRICT);
           hyphenok = FALSE;
           ptr++;
           }
@@ -4427,7 +4427,6 @@ while (ptr < ptrend)
             case CHAR_n: *optset |= PCRE2_NO_AUTO_CAPTURE; break;
             case CHAR_r: *xoptset|= PCRE2_EXTRA_CASELESS_RESTRICT; break;
             case CHAR_s: *optset |= PCRE2_DOTALL; break;
-            case CHAR_t: *xoptset|= PCRE2_EXTRA_TURKISH_CASING; break;
             case CHAR_U: *optset |= PCRE2_UNGREEDY; break;
 
             /* If x appears twice it sets the extended extended option. */
@@ -10307,6 +10306,7 @@ PCRE2_SIZE parsed_size_needed;        /* Needed for parsed pattern */
 uint32_t firstcuflags, reqcuflags;    /* Type of first/req code unit */
 uint32_t firstcu, reqcu;              /* Value of first/req code unit */
 uint32_t setflags = 0;                /* NL and BSR set flags */
+uint32_t xoptions;                    /* Flags from context, modified */
 
 uint32_t skipatstart;                 /* When checking (*UTF) etc */
 uint32_t limit_heap  = UINT32_MAX;
@@ -10481,6 +10481,7 @@ non-zero-terminated patterns. */
 if (zero_terminated) VALGRIND_MAKE_MEM_NOACCESS(pattern + patlen, CU2BYTES(1));
 #endif
 
+xoptions = ccontext->extra_options;
 ptr = pattern;
 skipatstart = 0;
 
@@ -10504,6 +10505,10 @@ if ((options & PCRE2_LITERAL) == 0)
           {
           case PSO_OPT:
           cb.external_options |= p->value;
+          break;
+
+          case PSO_XOPT:
+          xoptions |= p->value;
           break;
 
           case PSO_FLG:
@@ -10724,7 +10729,7 @@ cb.parsed_pattern_end = cb.parsed_pattern + parsed_size_needed + 1;
 
 /* Do the parsing scan. */
 
-errorcode = parse_regex(ptr, cb.external_options, &has_lookbehind, &cb);
+errorcode = parse_regex(ptr, cb.external_options, xoptions, &has_lookbehind, &cb);
 if (errorcode != 0) goto HAD_CB_ERROR;
 
 /* If there are any lookbehinds, scan the parsed pattern to figure out their
@@ -10799,7 +10804,7 @@ pptr = cb.parsed_pattern;
 code = cworkspace;
 *code = OP_BRA;
 
-(void)compile_regex(cb.external_options, ccontext->extra_options, &code, &pptr,
+(void)compile_regex(cb.external_options, xoptions, &code, &pptr,
    &errorcode, 0, &firstcu, &firstcuflags, &reqcu, &reqcuflags, NULL, NULL,
    &cb, &length);
 
@@ -10851,7 +10856,7 @@ re->blocksize = re_blocksize;
 re->magic_number = MAGIC_NUMBER;
 re->compile_options = options;
 re->overall_options = cb.external_options;
-re->extra_options = ccontext->extra_options;
+re->extra_options = xoptions;
 re->flags = PCRE2_CODE_UNIT_WIDTH/8 | cb.external_flags | setflags;
 re->limit_heap = limit_heap;
 re->limit_match = limit_match;
@@ -10905,7 +10910,7 @@ of the function here. */
 pptr = cb.parsed_pattern;
 code = (PCRE2_UCHAR *)codestart;
 *code = OP_BRA;
-regexrc = compile_regex(re->overall_options, ccontext->extra_options, &code,
+regexrc = compile_regex(re->overall_options, re->extra_options, &code,
   &pptr, &errorcode, 0, &firstcu, &firstcuflags, &reqcu, &reqcuflags, NULL,
   NULL, &cb, NULL);
 if (regexrc < 0) re->flags |= PCRE2_MATCH_EMPTY;
