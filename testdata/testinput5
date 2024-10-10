@@ -2342,114 +2342,133 @@
 /i/i,utf
     i
     I
+\= Expect no match
     \x{0130}
     \x{0131}
 
 /i/i,utf,turkish_casing
     i
-    I
     \x{0130}
+\= Expect no match
+    I
     \x{0131}
 
 /I/i,utf
     i
     I
+\= Expect no match
     \x{0130}
     \x{0131}
 
 /I/i,utf,turkish_casing
-    i
     I
-    \x{0130}
     \x{0131}
+\= Expect no match
+    i
+    \x{0130}
 
 /\x{0130}/i,utf
+    \x{0130}
+\= Expect no match
     i
     I
-    \x{0130}
     \x{0131}
 
 /\x{0130}/i,utf,turkish_casing
     i
-    I
     \x{0130}
+\= Expect no match
+    I
     \x{0131}
 
 /\x{0131}/i,utf
+    \x{0131}
+\= Expect no match
     i
     I
     \x{0130}
-    \x{0131}
 
 /\x{0131}/i,utf,turkish_casing
-    i
     I
-    \x{0130}
     \x{0131}
+\= Expect no match
+    i
+    \x{0130}
 
 /[i]/i,utf
     i
     I
+\= Expect no match
     \x{0130}
     \x{0131}
 
 /[i]/i,utf,turkish_casing
     i
-    I
     \x{0130}
+\= Expect no match
+    I
     \x{0131}
 
 /[\x{0130}]/i,utf
+    \x{0130}
+\= Expect no match
     i
     I
-    \x{0130}
     \x{0131}
 
 /[\x{0130}]/i,utf,turkish_casing
     i
-    I
     \x{0130}
+\= Expect no match
+    I
     \x{0131}
 
 /[\x{0120}-\x{0130}]/i,utf
+    \x{0130}
+\= Expect no match
     i
     I
-    \x{0130}
     \x{0131}
 
 /[\x{0120}-\x{0130}]/i,utf,turkish_casing
     i
-    I
     \x{0130}
+\= Expect no match
+    I
     \x{0131}
 
 /[zi]/i,utf
     i
     I
+\= Expect no match
     \x{0130}
     \x{0131}
 
 /[zi]/i,utf,turkish_casing
     i
-    I
     \x{0130}
+\= Expect no match
+    I
     \x{0131}
 
 /[z\x{0130}]/i,utf
+    \x{0130}
+\= Expect no match
     i
     I
-    \x{0130}
     \x{0131}
 
 /[z\x{0130}]/i,utf,turkish_casing
     i
-    I
     \x{0130}
+\= Expect no match
+    I
     \x{0131}
 
 /[iI]/i,utf
     i
     I
+\= Expect no match
     \x{0130}
     \x{0131}
 
@@ -2463,28 +2482,33 @@
     i
     I
     \x{0130}
+\= Expect no match
     \x{0131}
 
 /[i\x{0130}]/i,utf,turkish_casing
     i
-    I
     \x{0130}
+\= Expect no match
+    I
     \x{0131}
 
 /(.) \1/i,utf
     i I
+\= Expect no match
     i \x{0130}
     \x{0131} I
 
 /(.) (?t:\1)/i,utf
-    i I
     i \x{0130}
     \x{0131} I
+\= Expect no match
+    i I
 
 /(.) \1/i,utf,turkish_casing
-    i I
     i \x{0130}
     \x{0131} I
+\= Expect no match
+    i I
 
 # End Turkish casing tests
 

@@ -5319,6 +5319,7 @@ No match
  0: i
     I
  0: I
+\= Expect no match
     \x{0130}
 No match
     \x{0131}
@@ -5327,10 +5328,11 @@ No match
 /i/i,utf,turkish_casing
     i
  0: i
-    I
-No match
     \x{0130}
  0: \x{130}
+\= Expect no match
+    I
+No match
     \x{0131}
 No match
 
@@ -5339,66 +5341,73 @@ No match
  0: i
     I
  0: I
+\= Expect no match
     \x{0130}
 No match
     \x{0131}
 No match
 
 /I/i,utf,turkish_casing
-    i
-No match
     I
  0: I
-    \x{0130}
-No match
     \x{0131}
  0: \x{131}
+\= Expect no match
+    i
+No match
+    \x{0130}
+No match
 
 /\x{0130}/i,utf
+    \x{0130}
+ 0: \x{130}
+\= Expect no match
     i
 No match
     I
 No match
-    \x{0130}
- 0: \x{130}
     \x{0131}
 No match
 
 /\x{0130}/i,utf,turkish_casing
     i
  0: i
-    I
-No match
     \x{0130}
  0: \x{130}
+\= Expect no match
+    I
+No match
     \x{0131}
 No match
 
 /\x{0131}/i,utf
+    \x{0131}
+ 0: \x{131}
+\= Expect no match
     i
 No match
     I
 No match
     \x{0130}
 No match
-    \x{0131}
- 0: \x{131}
 
 /\x{0131}/i,utf,turkish_casing
-    i
-No match
     I
  0: I
-    \x{0130}
-No match
     \x{0131}
  0: \x{131}
+\= Expect no match
+    i
+No match
+    \x{0130}
+No match
 
 /[i]/i,utf
     i
  0: i
     I
  0: I
+\= Expect no match
     \x{0130}
 No match
     \x{0131}
@@ -5407,50 +5416,55 @@ No match
 /[i]/i,utf,turkish_casing
     i
  0: i
-    I
-No match
     \x{0130}
  0: \x{130}
+\= Expect no match
+    I
+No match
     \x{0131}
 No match
 
 /[\x{0130}]/i,utf
+    \x{0130}
+ 0: \x{130}
+\= Expect no match
     i
 No match
     I
 No match
-    \x{0130}
- 0: \x{130}
     \x{0131}
 No match
 
 /[\x{0130}]/i,utf,turkish_casing
     i
  0: i
-    I
-No match
     \x{0130}
  0: \x{130}
+\= Expect no match
+    I
+No match
     \x{0131}
 No match
 
 /[\x{0120}-\x{0130}]/i,utf
+    \x{0130}
+ 0: \x{130}
+\= Expect no match
     i
 No match
     I
 No match
-    \x{0130}
- 0: \x{130}
     \x{0131}
 No match
 
 /[\x{0120}-\x{0130}]/i,utf,turkish_casing
     i
  0: i
-    I
-No match
     \x{0130}
  0: \x{130}
+\= Expect no match
+    I
+No match
     \x{0131}
 No match
 
@@ -5459,6 +5473,7 @@ No match
  0: i
     I
  0: I
+\= Expect no match
     \x{0130}
 No match
     \x{0131}
@@ -5467,30 +5482,33 @@ No match
 /[zi]/i,utf,turkish_casing
     i
  0: i
-    I
-No match
     \x{0130}
  0: \x{130}
+\= Expect no match
+    I
+No match
     \x{0131}
 No match
 
 /[z\x{0130}]/i,utf
+    \x{0130}
+ 0: \x{130}
+\= Expect no match
     i
 No match
     I
 No match
-    \x{0130}
- 0: \x{130}
     \x{0131}
 No match
 
 /[z\x{0130}]/i,utf,turkish_casing
     i
  0: i
-    I
-No match
     \x{0130}
  0: \x{130}
+\= Expect no match
+    I
+No match
     \x{0131}
 No match
 
@@ -5499,6 +5517,7 @@ No match
  0: i
     I
  0: I
+\= Expect no match
     \x{0130}
 No match
     \x{0131}
@@ -5521,16 +5540,18 @@ No match
  0: I
     \x{0130}
  0: \x{130}
+\= Expect no match
     \x{0131}
 No match
 
 /[i\x{0130}]/i,utf,turkish_casing
     i
  0: i
-    I
-No match
     \x{0130}
  0: \x{130}
+\= Expect no match
+    I
+No match
     \x{0131}
 No match
 
@@ -5538,30 +5559,33 @@ No match
     i I
  0: i I
  1: i
+\= Expect no match
     i \x{0130}
 No match
     \x{0131} I
 No match
 
 /(.) (?t:\1)/i,utf
-    i I
-No match
     i \x{0130}
  0: i \x{130}
  1: i
     \x{0131} I
  0: \x{131} I
  1: \x{131}
+\= Expect no match
+    i I
+No match
 
 /(.) \1/i,utf,turkish_casing
-    i I
-No match
     i \x{0130}
  0: i \x{130}
  1: i
     \x{0131} I
  0: \x{131} I
  1: \x{131}
+\= Expect no match
+    i I
+No match
 
 # End Turkish casing tests
 
