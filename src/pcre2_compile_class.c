@@ -146,25 +146,20 @@ while (c <= end)
     }
 
   /* Compute caseless set. */
-  co = UCD_CASESET(c);
 
   if ((options & PARSE_CLASS_TURKISH_UTF) && UCD_ANY_I(c))
     {
-    list = tmp;
-    if (UCD_DOTTED_I(c))
-      {
-      tmp[0] = 0x69;
-      tmp[1] = 0x0130;
-      }
-    else
-      {
-      tmp[0] = 0x49;
-      tmp[1] = 0x0131;
-      }
-    tmp[2] = NOTACHAR;
+    co = UCD_DOTTED_I(c)? PRIV(ucd_turkish_dotted_i_caseset) :
+        PRIV(ucd_turkish_dotless_i_caseset);
     }
-  else if (co != 0 && (!(options & PARSE_CLASS_RESTRICTED_UTF)
-                       || PRIV(ucd_caseless_sets)[co] > 127))
+  else if ((co = UCD_CASESET(c)) != 0 &&
+           (options & PARSE_CLASS_RESTRICTED_UTF) != 0 &&
+           PRIV(ucd_caseless_sets)[co] < 128)
+    {
+    co = 0;  /* Ignore the caseless set if it's restricted. */
+    }
+
+  if (co != 0)
     list = PRIV(ucd_caseless_sets) + co;
   else
     {

@@ -1641,7 +1641,7 @@ sign) and U+017F (long S) respectively. If you do not want this case
 equivalence, you can suppress it by setting PCRE2_EXTRA_CASELESS_RESTRICT.
 .P
 One language family, Turkish and Azeri, has its own case-insensitivity rules,
-which can selected by setting PCRE2_EXTRA_TURKISH_CASING. This alters the
+which can be selected by setting PCRE2_EXTRA_TURKISH_CASING. This alters the
 behaviour of the 'i', 'I', U+0130 (capital I with dot above), and U+0131
 (small dotless i) characters.
 .P
@@ -1993,11 +1993,18 @@ The second effect of PCRE2_UCP is to force the use of Unicode properties for
 upper/lower casing operations, even when PCRE2_UTF is not set. This makes it
 possible to process strings in the 16-bit UCS-2 code. This option is available
 only if PCRE2 has been compiled with Unicode support (which is the default).
+.P
 The PCRE2_EXTRA_CASELESS_RESTRICT option (see above) restricts caseless
 matching such that ASCII characters match only ASCII characters and non-ASCII
 characters match only non-ASCII characters. The PCRE2_EXTRA_TURKISH_CASING option
-(see above) alters the matching of the 'i' characters as they used in Turkish
-and Azeri languages.
+(see above) alters the matching of the 'i' characters to follow their behaviour
+in Turkish and Azeri languages. For further details on
+PCRE2_EXTRA_CASELESS_RESTRICT and PCRE2_EXTRA_TURKISH_CASING and the effect when
+both are used together, see the
+.\" HREF
+\fBpcre2unicode\fP
+.\"
+page.
 .sp
   PCRE2_UNGREEDY
 .sp

@@ -425,8 +425,8 @@ if (caseless)
 
       if (turkish_casing && UCD_ANY_I(d))
         {
-        c = (c == 0x0130)? 0x69 : (c == 0x49)? 0x0131 : c;
-        d = (d == 0x0130)? 0x69 : (d == 0x49)? 0x0131 : d;
+        c = UCD_FOLD_I_TURKISH(c);
+        d = UCD_FOLD_I_TURKISH(d);
         if (c != d) return -1;  /* No match */
         }
       else if (c != d && c != (uint32_t)((int)d + (ur = GET_UCD(d))->other_case))

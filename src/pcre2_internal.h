@@ -1914,6 +1914,9 @@ typedef struct {
   (((uint32_t)(ch) | 0x20u) == 0x69u || ((uint32_t)(ch) | 1u) == 0x0131u)
 #define UCD_DOTTED_I(ch) \
   ((uint32_t)(ch) == 0x69u || (uint32_t)(ch) == 0x0130u)
+#define UCD_FOLD_I_TURKISH(ch) \
+  ((uint32_t)(ch) == 0x0130u ?   0x69u : \
+   (uint32_t)(ch) ==   0x49u ? 0x0131u : (uint32_t)(ch))
 
 /* The "scriptx" and bprops fields contain offsets into vectors of 32-bit words
 that form a bitmap representing a list of scripts or boolean properties. These

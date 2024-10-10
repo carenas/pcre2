@@ -5740,9 +5740,11 @@ for (;; pptr++)
     /* Empty character classes are allowed if PCRE2_ALLOW_EMPTY_CLASS is set.
     Otherwise, an initial ']' is taken as a data character. When empty classes
     are allowed, [] must generate an empty class - we have no dedicated opcode
-    to optimise the representation, but it's a rare (and useless?) case. The
-    empty-negated [^] matches any character, so is useful: generate
-    OP_ALLANY. */
+    to optimise the representation, but it's a rare case (the '(*FAIL)'
+    construct would be a clearer way for a pattern author to represent a
+    non-matching branch, but it does have different semantics to '[]' if both
+    are followed by a quantifier). The empty-negated [^] matches any character,
+    so is useful: generate OP_ALLANY for this. */
 
     case META_CLASS_EMPTY:
     case META_CLASS_EMPTY_NOT:
@@ -5821,17 +5823,17 @@ for (;; pptr++)
 
         if ((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0 && UCD_ANY_I(c))
           {
-          *code++ = OP_NOTPROP;
-          *code++ = PT_CLIST;
-          *code++ = UCD_DOTTED_I(meta)? PRIV(ucd_turkish_dotted_i_caseset) :
+          caseset = UCD_DOTTED_I(meta)? PRIV(ucd_turkish_dotted_i_caseset) :
               PRIV(ucd_turkish_dotless_i_caseset);
-          break;   /* We are finished with this class */
+          }
+        else if ((caseset = UCD_CASESET(c)) != 0 &&
+                 (xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0 &&
+                 PRIV(ucd_caseless_sets)[caseset] < 128)
+          {
+          caseset = 0;  /* Ignore the caseless set if it's restricted. */
           }
 
-        caseset = UCD_CASESET(c);
-        if (caseset != 0 &&
-              ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) == 0 ||
-               PRIV(ucd_caseless_sets)[caseset] > 127))
+        if (caseset != 0)
           {
           *code++ = OP_NOTPROP;
           *code++ = PT_CLIST;
@@ -7210,9 +7212,9 @@ for (;; pptr++)
       PUT2INC(code, 0, count);
       if ((options & PCRE2_CASELESS) != 0)
         *code++ = (((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0)?
-            REFI_FLAG_CASELESS_RESTRICT : 0) |
+                   REFI_FLAG_CASELESS_RESTRICT : 0) |
                   (((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0)?
-            REFI_FLAG_TURKISH_CASING : 0);
+                   REFI_FLAG_TURKISH_CASING : 0);
       }
     break;
 
@@ -8169,9 +8171,9 @@ for (;; pptr++)
     PUT2INC(code, 0, meta_arg);
     if ((options & PCRE2_CASELESS) != 0)
       *code++ = (((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0)?
-          REFI_FLAG_CASELESS_RESTRICT : 0) |
+                 REFI_FLAG_CASELESS_RESTRICT : 0) |
                 (((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0)?
-          REFI_FLAG_TURKISH_CASING : 0);
+                 REFI_FLAG_TURKISH_CASING : 0);
 
     /* Update the map of back references, and keep the highest one. We
     could do this in parse_regex() for numerical back references, but not
@@ -8377,19 +8379,17 @@ for (;; pptr++)
 
       if ((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0 && UCD_ANY_I(meta))
         {
-        *code++ = OP_PROP;
-        *code++ = PT_CLIST;
-        *code++ = UCD_DOTTED_I(meta)? PRIV(ucd_turkish_dotted_i_caseset) :
+        caseset = UCD_DOTTED_I(meta)? PRIV(ucd_turkish_dotted_i_caseset) :
             PRIV(ucd_turkish_dotless_i_caseset);
-        if (firstcuflags == REQ_UNSET)
-          firstcuflags = zerofirstcuflags = REQ_NONE;
-        break;  /* End handling this meta item */
+        }
+      else if ((caseset = UCD_CASESET(meta)) != 0 &&
+               (xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0 &&
+               PRIV(ucd_caseless_sets)[caseset] < 128)
+        {
+        caseset = 0;  /* Ignore the caseless set if it's restricted. */
         }
 
-      caseset = UCD_CASESET(meta);
-      if (caseset != 0 &&
-           ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) == 0 ||
-           PRIV(ucd_caseless_sets)[caseset] > 127))
+      if (caseset != 0)
         {
         *code++ = OP_PROP;
         *code++ = PT_CLIST;
