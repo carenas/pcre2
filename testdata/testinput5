@@ -2510,6 +2510,42 @@
 \= Expect no match
     i I
 
+/(.) \1/i,ucp
+    i I
+
+/(.) \1/i,ucp,turkish_casing
+\= Expect no match
+    i I
+
+/[a-z][^i]I/utf,caseless_restrict,turkish_casing
+    bII
+    b\x{0130}I
+    b\x{0131}I
+\= Expect no match
+    biI
+
+/[a-z][^i]I/i,utf,caseless_restrict,turkish_casing
+    biI
+    b\x{0130}I
+\= Expect no match
+    bII
+    b\x{0131}I
+
+/i/i,utf,caseless_restrict,turkish_casing
+    i
+    \x{0130}
+\= Expect no match
+    I
+    \x{0131}
+
+/[\x{00FF}-\x{FFEE}]/i,utf,caseless_restrict,turkish_casing
+    i
+    I
+    \x{0130}
+    \x{0131}
+\= Expect no match
+    k
+
 # End Turkish casing tests
 
 # TESTS for PCRE2_EXTRA_ASCII_xxx - again, tests with and without.
