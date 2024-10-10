@@ -170,7 +170,7 @@ ASCII or non-ASCII; there can be no mixing.
 </P>
 <P>
 One language family, Turkish and Azeri, has its own case-insensitivity rules,
-which can selected by setting PCRE2_EXTRA_TURKISH_CASING. This alters the
+which can be selected by setting PCRE2_EXTRA_TURKISH_CASING. This alters the
 behaviour of the 'i', 'I', U+0130 (capital I with dot above), and U+0131
 (small dotless i) characters.
 <pre>
@@ -182,6 +182,17 @@ behaviour of the 'i', 'I', U+0130 (capital I with dot above), and U+0131
       'i' = U+0130 (capital I with dot above)
       U+0131 (small dotless i) = 'I'
 </PRE>
+</P>
+<P>
+It is allowed to specify both PCRE2_EXTRA_CASELESS_RESTRICT and
+PCRE2_EXTRA_TURKISH_CASING together. The behaviour is to apply
+PCRE2_EXTRA_CASELESS_RESTRICT first, removing case-folding mappings which
+cross the ASCII boundary; and then to apply PCRE2_EXTRA_TURKISH_CASING to add
+the Turkish case-folding mappings for 'i'. The result is that there are two
+case-folding mappings crossing the ASCII boundary (the Turkish 'i' ones, as
+requested), but the other mappings (Kelvin sign and long S) are removed.
+If you require exact ASCII matching of ASCII characters in patterns, then
+you must use PCRE2_EXTRA_CASELESS_RESTRICT without PCRE2_EXTRA_TURKISH_CASING.
 </P>
 <P>
 From release 10.45 the Unicode letter properties Lu (upper case), Ll (lower
