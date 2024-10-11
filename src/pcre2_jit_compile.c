@@ -9455,7 +9455,7 @@ else
   OP1(SLJIT_MOV, TMP1, 0, SLJIT_MEM1(TMP2), 0);
 
 #if defined SUPPORT_UNICODE
-if (common->utf && (*cc == OP_REFI || *cc == OP_DNREFI))
+if ((common->utf || common->ucp) && (*cc == OP_REFI || *cc == OP_DNREFI))
   {
   SLJIT_ASSERT(common->iref_ptr != 0);
 
