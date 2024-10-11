@@ -9498,14 +9498,16 @@ if ((common->utf || common->ucp) && (*cc == OP_REFI || *cc == OP_DNREFI))
     OP2(SLJIT_OR, SLJIT_TMP_DEST_REG, 0, char1_reg, 0, SLJIT_IMM, 0x20);
     turkish_ascii_i = CMP(SLJIT_EQUAL, SLJIT_TMP_DEST_REG, 0, SLJIT_IMM, 0x69);
 
-    if (refi_flag & REFI_FLAG_CASELESS_RESTRICT)
-      add_jump(compiler, &no_match, turkish_ascii_i);
+    // ??? What has REFI_FLAG_CASELESS_RESTRICT got to do with it?
+    // if (refi_flag & REFI_FLAG_CASELESS_RESTRICT)
+    //  add_jump(compiler, &no_match, turkish_ascii_i);
 
     OP2(SLJIT_OR, SLJIT_TMP_DEST_REG, 0, char1_reg, 0, SLJIT_IMM, 0x1);
     turkish_non_ascii_i = CMP(SLJIT_EQUAL, SLJIT_TMP_DEST_REG, 0, SLJIT_IMM, 0x131);
 
-    if (refi_flag & REFI_FLAG_CASELESS_RESTRICT)
-      add_jump(compiler, &no_match, turkish_non_ascii_i);
+    // ??? What has REFI_FLAG_CASELESS_RESTRICT got to do with it?
+    // if (refi_flag & REFI_FLAG_CASELESS_RESTRICT)
+    //  add_jump(compiler, &no_match, turkish_non_ascii_i);
     }
 
   OP1(SLJIT_MOV, TMP3, 0, TMP1, 0);
@@ -9536,7 +9538,8 @@ if ((common->utf || common->ucp) && (*cc == OP_REFI || *cc == OP_DNREFI))
   JUMPTO(SLJIT_EQUAL, loop);
   JUMPTO(SLJIT_LESS, caseless_loop);
 
-  if ((refi_flag & (REFI_FLAG_TURKISH_CASING | REFI_FLAG_CASELESS_RESTRICT)) == REFI_FLAG_TURKISH_CASING)
+  // ??? More REFI_FLAG_CASELESS_RESTRICT checks Zoltan added?
+  if (refi_flag & REFI_FLAG_TURKISH_CASING)
     {
     add_jump(compiler, &no_match, JUMP(SLJIT_JUMP));
     JUMPHERE(turkish_ascii_i);
@@ -9555,6 +9558,7 @@ if ((common->utf || common->ucp) && (*cc == OP_REFI || *cc == OP_DNREFI))
     OP2(SLJIT_SHL, char1_reg, 0, char1_reg, 0, SLJIT_IMM, 5);
     OP2(SLJIT_ADD, char1_reg, 0, char1_reg, 0, SLJIT_IMM, 0x49);
     CMPTO(SLJIT_EQUAL, TMP1, 0, char1_reg, 0, loop);
+    // add_jump(compiler, &no_match, JUMP(SLJIT_JUMP));
     }
 
   set_jumps(no_match, LABEL());
