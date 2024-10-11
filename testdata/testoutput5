@@ -5609,60 +5609,34 @@ No match
     i I
 No match
 
-/(.) \1/i,ucp
-    i I
- 0: i I
- 1: i
-
-/(.) \1/i,ucp,turkish_casing
-\= Expect no match
-    i I
-No match
-
-/[a-z][^i]I/utf,caseless_restrict,turkish_casing
-    bII
- 0: bII
-    b\x{0130}I
- 0: b\x{130}I
-    b\x{0131}I
- 0: b\x{131}I
-\= Expect no match
-    biI
-No match
-
-/[a-z][^i]I/i,utf,caseless_restrict,turkish_casing
-    bII
- 0: bII
-    b\x{0131}I
- 0: b\x{131}I
-\= Expect no match
-    biI
-No match
-    b\x{0130}I
-No match
-
 /i/i,utf,caseless_restrict,turkish_casing
-    i
- 0: i
-    \x{0130}
- 0: \x{130}
-\= Expect no match
-    I
-No match
-    \x{0131}
-No match
+Failed: error 206 at offset 0: PCRE2_EXTRA_TURKISH_CASING and PCRE2_EXTRA_CASELESS_RESTRICT are not compatible
 
-/[\x{00FF}-\x{FFEE}]/i,utf,caseless_restrict,turkish_casing
+/i/i,caseless_restrict
+Failed: error 204 at offset 0: PCRE2_EXTRA_TURKISH_CASING and PCRE2_EXTRA_CASELESS_RESTRICT require Unicode (UTF or UCP) mode
+
+/i/i,turkish_casing
+Failed: error 204 at offset 0: PCRE2_EXTRA_TURKISH_CASING and PCRE2_EXTRA_CASELESS_RESTRICT require Unicode (UTF or UCP) mode
+
+/i/i,utf,caseless_restrict
     i
  0: i
-    I
- 0: I
-    \x{0130}
- 0: \x{130}
-    \x{0131}
- 0: \x{131}
+
+/i/i,ucp,caseless_restrict
+    i
+ 0: i
+
+/b(?r:[\x{00FF}-\x{FFEE}])/i,utf,turkish_casing
+    b\x{0130}
+ 0: b\x{130}
+    b\x{0131}
+ 0: b\x{131}
 \= Expect no match
-    k
+    bi
+No match
+    bI
+No match
+    bk
 No match
 
 # End Turkish casing tests

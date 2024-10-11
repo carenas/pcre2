@@ -5825,8 +5825,7 @@ for (;; pptr++)
               PCRE2_EXTRA_TURKISH_CASING &&
             UCD_ANY_I(c))
           {
-          caseset = UCD_DOTTED_I(c)? PRIV(ucd_turkish_dotted_i_caseset) :
-              PRIV(ucd_turkish_dotless_i_caseset);
+          caseset = PRIV(ucd_turkish_dotted_i_caseset) + (UCD_DOTTED_I(c)? 0 : 3);
           }
         else if ((caseset = UCD_CASESET(c)) != 0 &&
                  (xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0 &&
@@ -8385,8 +8384,7 @@ for (;; pptr++)
             PCRE2_EXTRA_TURKISH_CASING &&
           UCD_ANY_I(meta))
         {
-        caseset = UCD_DOTTED_I(meta)? PRIV(ucd_turkish_dotted_i_caseset) :
-            PRIV(ucd_turkish_dotless_i_caseset);
+        caseset = PRIV(ucd_turkish_dotted_i_caseset) + (UCD_DOTTED_I(meta)? 0 : 3);
         }
       else if ((caseset = UCD_CASESET(meta)) != 0 &&
                (xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0 &&

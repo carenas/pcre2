@@ -146,11 +146,11 @@ const uint32_t PRIV(ucd_caseless_sets)[] = {
   0x0049,  0x0131,  NOTACHAR,
 };
 
-/* These are the indices, within ucd_caseless_sets, of the additional
-Turkish case-equivalences. */
+/* This is the index, within ucd_caseless_sets, of the additional
+Turkish case-equivalences. The dotted I ones are this offset; the
+dotless I are +3 from here. */
 
 const uint32_t PRIV(ucd_turkish_dotted_i_caseset) = 112;
-const uint32_t PRIV(ucd_turkish_dotless_i_caseset) = 115;
 
 /* When #included in pcre2test, we don't need the table of digit sets, nor the
 the large main UCD tables. */

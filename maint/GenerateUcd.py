@@ -740,7 +740,6 @@ for s in caseless_sets:
 # Append a couple of extra caseless sets (unreferenced by the record objects)
 # to hold the optional Turkish case equivalences.
 turkish_dotted_i_index = offset
-turkish_dotless_i_index = offset + 3
 caseless_sets.append([0x69, 0x0130])
 caseless_sets.append([0x49, 0x0131])
 
@@ -865,13 +864,13 @@ f.write('};\n\n')
 # --- Output the indices of the Turkish caseless character sets ---
 
 f.write("""\
-/* These are the indices, within ucd_caseless_sets, of the additional
-Turkish case-equivalences. */
+/* This is the index, within ucd_caseless_sets, of the additional
+Turkish case-equivalences. The dotted I ones are this offset; the
+dotless I are +3 from here. */
 
 const uint32_t PRIV(ucd_turkish_dotted_i_caseset) = %d;
-const uint32_t PRIV(ucd_turkish_dotless_i_caseset) = %d;
 
-""" % (turkish_dotted_i_index, turkish_dotless_i_index))
+""" % (turkish_dotted_i_index))
 
 # --- Other tables are not needed by pcre2test ---
 

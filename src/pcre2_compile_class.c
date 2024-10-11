@@ -147,10 +147,11 @@ while (c <= end)
 
   /* Compute caseless set. */
 
-  if ((options & PARSE_CLASS_TURKISH_UTF) && UCD_ANY_I(c))
+  if ((options & (PARSE_CLASS_TURKISH_UTF|PARSE_CLASS_RESTRICTED_UTF)) ==
+        PARSE_CLASS_TURKISH_UTF &&
+      UCD_ANY_I(c))
     {
-    co = UCD_DOTTED_I(c)? PRIV(ucd_turkish_dotted_i_caseset) :
-        PRIV(ucd_turkish_dotless_i_caseset);
+    co = PRIV(ucd_turkish_dotted_i_caseset) + (UCD_DOTTED_I(c)? 0 : 3);
     }
   else if ((co = UCD_CASESET(c)) != 0 &&
            (options & PARSE_CLASS_RESTRICTED_UTF) != 0 &&
