@@ -391,7 +391,7 @@ if (caseless)
 #if defined SUPPORT_UNICODE
   BOOL utf = (mb->poptions & PCRE2_UTF) != 0;
   BOOL caseless_restrict = (caseopts & REFI_FLAG_CASELESS_RESTRICT) != 0;
-  BOOL turkish_casing = (caseopts & REFI_FLAG_TURKISH_CASING) != 0;
+  BOOL turkish_casing = !caseless_restrict && (caseopts & REFI_FLAG_TURKISH_CASING) != 0;
 
   if (utf || (mb->poptions & PCRE2_UCP) != 0)
     {

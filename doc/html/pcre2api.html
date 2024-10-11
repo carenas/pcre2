@@ -2053,8 +2053,7 @@ matching such that ASCII characters match only ASCII characters and non-ASCII
 characters match only non-ASCII characters. The PCRE2_EXTRA_TURKISH_CASING option
 (see above) alters the matching of the 'i' characters to follow their behaviour
 in Turkish and Azeri languages. For further details on
-PCRE2_EXTRA_CASELESS_RESTRICT and PCRE2_EXTRA_TURKISH_CASING and the effect when
-both are used together, see the
+PCRE2_EXTRA_CASELESS_RESTRICT and PCRE2_EXTRA_TURKISH_CASING, see the
 <a href="pcre2unicode.html"><b>pcre2unicode</b></a>
 page.
 <pre>
@@ -2193,7 +2192,8 @@ characters. The ASCII letter S is case-equivalent to U+017f (long S) and the
 ASCII letter K is case-equivalent to U+212a (Kelvin sign). This option disables
 recognition of case-equivalences that cross the ASCII/non-ASCII boundary. In a
 caseless match, both characters must either be ASCII or non-ASCII. The option
-can be changed within a pattern by the (?r) option setting.
+can be changed within a pattern by the (*CASELESS_RESTRICT) or (?r) option
+settings. Either the UTF or UCP options must be set.
 <pre>
   PCRE2_EXTRA_ESCAPED_CR_IS_LF
 </pre>
@@ -2245,7 +2245,9 @@ callouts in the pattern are not silently ignored.
 </pre>
 This option alters case-equivalence of the 'i' letters to follow the
 alphabet used by Turkish and Azeri languages. The option can be changed within
-a pattern by the (*TURKISH_CASING) start-of-pattern setting.
+a pattern by the (*TURKISH_CASING) start-of-pattern setting. Either the UTF or
+UCP options must be set. In the 8-bit library, UTF must be set. This option
+cannot be combined with PCRE2_EXTRA_CASELESS_RESTRICT.
 <a name="jitcompiling"></a></P>
 <br><a name="SEC21" href="#TOC1">JUST-IN-TIME (JIT) COMPILATION</a><br>
 <P>

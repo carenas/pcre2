@@ -184,15 +184,8 @@ behaviour of the 'i', 'I', U+0130 (capital I with dot above), and U+0131
 </PRE>
 </P>
 <P>
-It is allowed to specify both PCRE2_EXTRA_CASELESS_RESTRICT and
-PCRE2_EXTRA_TURKISH_CASING together. The behaviour is to apply
-PCRE2_EXTRA_CASELESS_RESTRICT first, removing case-folding mappings which
-cross the ASCII boundary; and then to apply PCRE2_EXTRA_TURKISH_CASING to add
-the Turkish case-folding mappings for 'i'. The result is that there are two
-case-folding mappings crossing the ASCII boundary (the Turkish 'i' ones, as
-requested), but the other mappings (Kelvin sign and long S) are removed.
-If you require exact ASCII matching of ASCII characters in patterns, then
-you must use PCRE2_EXTRA_CASELESS_RESTRICT without PCRE2_EXTRA_TURKISH_CASING.
+It is not allowed to specify both PCRE2_EXTRA_CASELESS_RESTRICT and
+PCRE2_EXTRA_TURKISH_CASING together.
 </P>
 <P>
 From release 10.45 the Unicode letter properties Lu (upper case), Ll (lower

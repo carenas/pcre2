@@ -713,6 +713,7 @@ static const pso pso_list[] = {
   { STRING_NO_DOTSTAR_ANCHOR_RIGHTPAR, 18, PSO_OPTMZ, PCRE2_OPTIM_DOTSTAR_ANCHOR },
   { STRING_NO_JIT_RIGHTPAR,             7, PSO_FLG, PCRE2_NOJIT },
   { STRING_NO_START_OPT_RIGHTPAR,      13, PSO_OPTMZ, PCRE2_OPTIM_START_OPTIMIZE },
+  { STRING_CASELESS_RESTRICT_RIGHTPAR, 18, PSO_XOPT, PCRE2_EXTRA_CASELESS_RESTRICT },
   { STRING_TURKISH_CASING_RIGHTPAR,    15, PSO_XOPT, PCRE2_EXTRA_TURKISH_CASING },
   { STRING_LIMIT_HEAP_EQ,              11, PSO_LIMH, 0 },
   { STRING_LIMIT_MATCH_EQ,             12, PSO_LIMM, 0 },
@@ -5820,7 +5821,9 @@ for (;; pptr++)
         {
         uint32_t caseset;
 
-        if ((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0 && UCD_ANY_I(c))
+        if ((xoptions & (PCRE2_EXTRA_TURKISH_CASING|PCRE2_EXTRA_CASELESS_RESTRICT)) ==
+              PCRE2_EXTRA_TURKISH_CASING &&
+            UCD_ANY_I(c))
           {
           caseset = UCD_DOTTED_I(c)? PRIV(ucd_turkish_dotted_i_caseset) :
               PRIV(ucd_turkish_dotless_i_caseset);
@@ -5865,7 +5868,9 @@ for (;; pptr++)
       if ((UCD_CASESET(c) == 0 ||
            ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0 &&
             c < 128 && pptr[2] < 128)) &&
-          !((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0 && UCD_ANY_I(c)))
+          !((xoptions & (PCRE2_EXTRA_TURKISH_CASING|PCRE2_EXTRA_CASELESS_RESTRICT)) ==
+              PCRE2_EXTRA_TURKISH_CASING &&
+            UCD_ANY_I(c)))
 #endif
         {
         uint32_t d;
@@ -8376,7 +8381,9 @@ for (;; pptr++)
       {
       uint32_t caseset;
 
-      if ((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0 && UCD_ANY_I(meta))
+      if ((xoptions & (PCRE2_EXTRA_TURKISH_CASING|PCRE2_EXTRA_CASELESS_RESTRICT)) ==
+            PCRE2_EXTRA_TURKISH_CASING &&
+          UCD_ANY_I(meta))
         {
         caseset = UCD_DOTTED_I(meta)? PRIV(ucd_turkish_dotted_i_caseset) :
             PRIV(ucd_turkish_dotless_i_caseset);
@@ -10632,6 +10639,42 @@ if (ucp && (cb.external_options & PCRE2_NEVER_UCP) != 0)
   {
   errorcode = ERR75;
   goto HAD_EARLY_ERROR;
+  }
+
+/* PCRE2_EXTRA_CASELESS_RESTRICT checks */
+
+if ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0)
+  {
+  if (!utf && !ucp)
+    {
+    errorcode = ERR104;
+    goto HAD_EARLY_ERROR;
+    }
+  }
+
+/* PCRE2_EXTRA_TURKISH_CASING checks */
+
+if ((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0)
+  {
+  if (!utf && !ucp)
+    {
+    errorcode = ERR104;
+    goto HAD_EARLY_ERROR;
+    }
+
+#if PCRE2_CODE_UNIT_WIDTH == 8
+  if (!utf)
+    {
+    errorcode = ERR105;
+    goto HAD_EARLY_ERROR;
+    }
+#endif
+
+  if ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0)
+    {
+    errorcode = ERR106;
+    goto HAD_EARLY_ERROR;
+    }
   }
 
 /* Process the BSR setting. */

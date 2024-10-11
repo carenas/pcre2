@@ -329,6 +329,9 @@ pcre2_pattern_convert(). */
 #define PCRE2_ERROR_PATTERN_COMPILED_SIZE_TOO_BIG  201
 #define PCRE2_ERROR_OVERSIZE_PYTHON_OCTAL          202
 #define PCRE2_ERROR_CALLOUT_CALLER_DISABLED        203
+#define PCRE2_ERROR_EXTRA_CASING_REQUIRES_UNICODE  204
+#define PCRE2_ERROR_TURKISH_CASING_REQUIRES_UTF    205
+#define PCRE2_ERROR_EXTRA_CASING_INCOMPATIBLE      206
 
 
 /* "Expected" matching error codes: no match and partial match. */
