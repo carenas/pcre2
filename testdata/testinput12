@@ -628,7 +628,25 @@
     bII
     biI
 
+/b(?r:[\x{00FF}-\x{FFEE}])/i,ucp,turkish_casing
+    b\x{0130}
+    b\x{0131}
+    B\x{212a}
+\= Expect no match
+    bi
+    bI
+    bk
+
 # ---------------------------------------------------- 
+
+/b[\x{00FF}-\x{FFEE}]/ir
+    b\x{0130}
+    b\x{0131}
+    B\x{212a}
+\= Expect no match
+    bi
+    bI
+    bk
 
 # Quantifier after a literal that has the value of META_ACCEPT (not UTF). This
 # fails in 16-bit mode, but is OK for 32-bit.

@@ -10639,17 +10639,6 @@ if (ucp && (cb.external_options & PCRE2_NEVER_UCP) != 0)
   goto HAD_EARLY_ERROR;
   }
 
-/* PCRE2_EXTRA_CASELESS_RESTRICT checks */
-
-if ((xoptions & PCRE2_EXTRA_CASELESS_RESTRICT) != 0)
-  {
-  if (!utf && !ucp)
-    {
-    errorcode = ERR104;
-    goto HAD_EARLY_ERROR;
-    }
-  }
-
 /* PCRE2_EXTRA_TURKISH_CASING checks */
 
 if ((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0)
