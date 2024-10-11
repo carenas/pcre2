@@ -608,18 +608,18 @@
     biI
 
 /[a-z][^i]I/i,ucp,turkish_casing
-    b\x{0130}I
-\= Expect no match
-    bII
-    biI
     b\x{0131}I
+    bII
+\= Expect no match
+    biI
+    b\x{0130}I
 
 /[a-z][^i]I/ir,ucp,turkish_casing
-    b\x{0130}I
-\= Expect no match
-    bII
-    biI
     b\x{0131}I
+    bII
+\= Expect no match
+    biI
+    b\x{0130}I
 
 # ---------------------------------------------------- 
 

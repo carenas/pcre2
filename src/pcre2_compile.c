@@ -5822,7 +5822,7 @@ for (;; pptr++)
 
         if ((xoptions & PCRE2_EXTRA_TURKISH_CASING) != 0 && UCD_ANY_I(c))
           {
-          caseset = UCD_DOTTED_I(meta)? PRIV(ucd_turkish_dotted_i_caseset) :
+          caseset = UCD_DOTTED_I(c)? PRIV(ucd_turkish_dotted_i_caseset) :
               PRIV(ucd_turkish_dotless_i_caseset);
           }
         else if ((caseset = UCD_CASESET(c)) != 0 &&

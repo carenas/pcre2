@@ -2409,6 +2409,20 @@
     I
     \x{0131}
 
+/[^i]/i,utf
+    \x{0130}
+    \x{0131}
+\= Expect no match
+    i
+    I
+
+/[^i]/i,utf,turkish_casing
+    I
+    \x{0131}
+\= Expect no match
+    i
+    \x{0130}
+
 /[\x{0130}]/i,utf
     \x{0130}
 \= Expect no match
@@ -2525,11 +2539,11 @@
     biI
 
 /[a-z][^i]I/i,utf,caseless_restrict,turkish_casing
-    biI
-    b\x{0130}I
-\= Expect no match
     bII
     b\x{0131}I
+\= Expect no match
+    biI
+    b\x{0130}I
 
 /i/i,utf,caseless_restrict,turkish_casing
     i
