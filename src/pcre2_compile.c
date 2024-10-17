@@ -5949,7 +5949,7 @@ for (;; pptr++)
 
       if (cranges->range_list_size > 0)
         {
-        uint32_t *ranges = (uint32_t*)(cranges + 1);
+        const uint32_t *ranges = (const uint32_t *)(cranges + 1);
 
         if (ranges[0] <= 255)
           xclass_props |= XCLASS_HAS_8BIT_CHARS;
@@ -6659,7 +6659,7 @@ for (;; pptr++)
     if ((SELECT_VALUE8(!utf, 0) || negate_class != should_flip_negation) &&
         cb->classbits.classwords[0] == ~(uint32_t)0)
       {
-      uint32_t *classwords = cb->classbits.classwords;
+      const uint32_t *classwords = cb->classbits.classwords;
       int i;
 
       for (i = 0; i < 8; i++)
