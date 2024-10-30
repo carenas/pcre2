@@ -239,7 +239,8 @@ OPTION(PCRE2_BUILD_PCRE2_32 "Build 32 bit PCRE2 library" OFF)
 
 OPTION(PCRE2_STATIC_PIC "Build the static library with the option position independent code enabled." OFF)
 
-OPTION(PCRE2_DEBUG "Include debugging code" OFF)
+set(PCRE2_DEBUG "IfDebugBuild" CACHE STRING "Include debugging code")
+set_property(CACHE PCRE2_DEBUG PROPERTY STRINGS "IfDebugBuild" "ON" "OFF")
 
 OPTION(PCRE2_DISABLE_PERCENT_ZT "Disable the use of %zu and %td (rarely needed)" OFF)
 
@@ -688,6 +689,12 @@ ENDIF(MSVC AND PCRE2_STATIC_RUNTIME)
 # Build setup
 
 ADD_DEFINITIONS(-DHAVE_CONFIG_H)
+
+if(PCRE2_DEBUG STREQUAL "IfDebugBuild")
+  ADD_COMPILE_DEFINITIONS("$<$<CONFIG:Debug>:PCRE2_DEBUG>")
+elseif(PCRE2_DEBUG)
+  ADD_COMPILE_DEFINITIONS("PCRE2_DEBUG")
+endif()
 
 IF(MSVC)
   ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS)
