@@ -176,7 +176,7 @@ jobs:
           apt-get -qq install cmake ninja-build
 
       - name: Configure
-        run: cmake -G Ninja -B build -DPCRE2_BUILD_PCRE2_8=OFF -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_NEVER_BACKSLASH_C=ON
+        run: cmake -G 'Ninja Multi-Config' -B build -DPCRE2_BUILD_PCRE2_8=OFF -DPCRE2_BUILD_PCRE2_32=ON -DPCRE2_NEVER_BACKSLASH_C=ON -DCMAKE_VERBOSE_MAKEFILE=ON
 
       - name: Build
         run: cmake --build build
@@ -184,7 +184,7 @@ jobs:
       - name: Test
         run: |
           cd build
-          ctest .
+          ctest -C Debug .
           cd ..
           perl -v
           maint/RunPerlTest
