@@ -18,10 +18,9 @@ As well as downloading from the
 or the older, unmaintained PCRE1 library from an 
 [*unofficial* mirror](https://sourceforge.net/projects/pcre/files/) at SourceForge.
 
-You can check out the PCRE2 source code via Git or Subversion:
+You can check out the PCRE2 source code via Git:
 
-    git clone https://github.com/PCRE2Project/pcre2.git
-    svn co    https://github.com/PCRE2Project/pcre2.git
+    git clone --recursive https://github.com/PCRE2Project/pcre2.git
 
 ## Contributed Ports
 
