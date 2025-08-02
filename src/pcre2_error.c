@@ -56,7 +56,7 @@ such as XSTRING(MAX_NAME_SIZE) are not known. Instead,
 pcre2_get_error_message() counts through to the one it wants - this isn't a
 performance issue because these strings are used only when there is an error.
 
-Each substring ends with \0 to insert a null character. This includes the final
+Each substring ends with \0 to insert a NUL character. This includes the final
 substring, so that the whole string ends with \0\0, which can be detected when
 counting through. */
 
@@ -301,6 +301,39 @@ static const unsigned char match_error_texts[] =
   "replacement too large (longer than PCRE2_SIZE)\0"
   ;
 
+#define FIND_NONE	0	/* internal: tracking no error */
+#define FIND_BADDATA	1	/* maps to PCRE2_ERROR_BADDATA */
+#define FIND_OVERLONG	2	/* internal: reports a BUG, sadly at runtime  */
+
+static const unsigned char *
+find_strerror(const unsigned char *texts, int n, int *find_error)
+{
+const unsigned char *p = texts;
+for (; n > 0; n--)
+  {
+  p = memchr(texts, 0, PCRE2_ERROR_MAX_LENGTH);
+
+#ifdef PCRE2_DEBUG
+  /* The memchr() call should never fail, because all error messages MUST
+  be shorter than PCRE2_ERROR_MAX_LENGTH, and having less than 2^6 code
+  points makes it process efficiently using SIMD */
+
+  if (p == NULL)
+    {
+    *find_error = FIND_OVERLONG;
+    break;
+    }
+#endif
+  texts = ++p;
+  if (*texts == 0)
+    {
+    *find_error = FIND_BADDATA;
+    p = NULL;
+    break;
+    }
+  }
+return p;
+}
 
 /*************************************************
 *            Return error message                *
@@ -325,31 +358,28 @@ pcre2_get_error_message(int enumber, PCRE2_UCHAR *buffer, PCRE2_SIZE size)
 {
 const unsigned char *message;
 PCRE2_SIZE i;
-int n, rc = 0;
+int n, rc = 0, e = FIND_NONE;
 
 if (size == 0) return PCRE2_ERROR_NOMEMORY;
 
 if (enumber >= COMPILE_ERROR_BASE)  /* Compile error */
   {
-  message = compile_error_texts;
   n = enumber - COMPILE_ERROR_BASE;
+  message = find_strerror(compile_error_texts, n, &e);
   }
 else if (enumber < 0)               /* Match or UTF error */
   {
-  message = match_error_texts;
   n = -enumber;
+  message = find_strerror(match_error_texts, n, &e);
   }
 else                                /* Invalid error number */
   {
-  message = (const unsigned char *)"\0";  /* Empty message list */
-  n = 1;
+  *buffer = 0;
+  return PCRE2_ERROR_BADDATA;
   }
 
-for (; n > 0; n--)
-  {
-  while (*message++ != CHAR_NUL) {};
-  if (*message == CHAR_NUL) return PCRE2_ERROR_BADDATA;
-  }
+PCRE2_ASSERT(message != NULL || (message == NULL && e != FIND_OVERLONG));
+if (message == NULL) return PCRE2_ERROR_BADDATA;
 
 for (i = 0; *message != 0; i++)
   {

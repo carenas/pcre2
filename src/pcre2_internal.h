@@ -253,6 +253,12 @@ not rely on this. */
 
 #define COMPILE_ERROR_BASE 100
 
+/* The length of the message returned by pcre2_get_error_message() is meant
+to never exceed (including the space for the NUL character) this number of
+code units */
+
+#define PCRE2_ERROR_MAX_LENGTH 120
+
 /* The initial frames vector for remembering pcre2_match() backtracking points
 is allocated on the heap, of this size (bytes) or ten times the frame size if
 larger, unless the heap limit is smaller. Typical frame sizes are a few hundred

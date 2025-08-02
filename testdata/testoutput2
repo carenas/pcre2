@@ -23062,10 +23062,15 @@ Failed: error 217 at offset 27: expected capture group number or name
 # End of testinput2
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
+Error -29: bad data value
+Error -27: UTF-32 error: code points 0xd800-0xdfff are not defined
+Error -23: UTF-8 error: illegal byte (0xfe or 0xff)
 Error -2: partial match
 Error -1: no match
 Error 0: PCRE2_ERROR_BADDATA (unknown error number)
 Error 100: no error
 Error 101: \ at end of pattern
 Error 191: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not allowed in UTF-16 mode
+Error 212: missing terminating ] for extended character class (note '[' must be escaped under PCRE2_ALT_EXTENDED_CLASS)
+Error 213: unexpected expression in extended character class (no preceding operator)
 Error 300: PCRE2_ERROR_BADDATA (unknown error number)

@@ -1100,8 +1100,7 @@ static uint8_t *dbuffer = NULL;
 
 /* We use a separate buffer for reading error messages out of PCRE2. */
 
-static uint8_t errorbuffer[128*4];
-static size_t errorbuffer_size = sizeof(errorbuffer);
+static uint8_t errorbuffer[PCRE2_ERROR_MAX_LENGTH * 4];
 
 
 /* ---------------- Mode-dependent variables -------------------*/
@@ -1285,11 +1284,11 @@ are supported. */
 
 #define PCRE2_GET_ERROR_MESSAGE(r,a) \
   if (test_mode == PCRE8_MODE) \
-    r = pcre2_get_error_message_8(a,(PCRE2_UCHAR8 *)errorbuffer,errorbuffer_size); \
+    r = pcre2_get_error_message_8(a,(PCRE2_UCHAR8 *)errorbuffer,PCRE2_ERROR_MAX_LENGTH); \
   else if (test_mode == PCRE16_MODE) \
-    r = pcre2_get_error_message_16(a,(PCRE2_UCHAR16 *)errorbuffer,errorbuffer_size/2); \
+    r = pcre2_get_error_message_16(a,(PCRE2_UCHAR16 *)errorbuffer,PCRE2_ERROR_MAX_LENGTH); \
   else \
-    r = pcre2_get_error_message_32(a,(PCRE2_UCHAR32 *)errorbuffer,errorbuffer_size/4)
+    r = pcre2_get_error_message_32(a,(PCRE2_UCHAR32 *)errorbuffer,PCRE2_ERROR_MAX_LENGTH)
 
 #define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
   if (test_mode == PCRE8_MODE) \
@@ -1869,10 +1868,10 @@ the three different cases. */
 #define PCRE2_GET_ERROR_MESSAGE(r,a) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
     r = G(pcre2_get_error_message_,BITONE)(a,(G(PCRE2_UCHAR,BITONE) *)errorbuffer, \
-      errorbuffer_size/BYTEONE); \
+      PCRE2_ERROR_MAX_LENGTH); \
   else \
     r = G(pcre2_get_error_message_,BITTWO)(a,(G(PCRE2_UCHAR,BITTWO) *)errorbuffer, \
-      errorbuffer_size/BYTETWO)
+      PCRE2_ERROR_MAX_LENGTH)
 
 #define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
   if (test_mode == G(G(PCRE,BITONE),_MODE)) \
@@ -2272,7 +2271,7 @@ the three different cases. */
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
   a = pcre2_dfa_match_8(G(b,8),(PCRE2_SPTR8)c,d,e,f,G(g,8),h,i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a) \
-  r = pcre2_get_error_message_8(a,(PCRE2_UCHAR8 *)errorbuffer,errorbuffer_size)
+  r = pcre2_get_error_message_8(a,(PCRE2_UCHAR8 *)errorbuffer,PCRE2_ERROR_MAX_LENGTH)
 #define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
   r = pcre2_get_match_data_heapframes_size_8(G(a,8))
 #define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_8(G(b,8))
@@ -2389,7 +2388,7 @@ the three different cases. */
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
   a = pcre2_dfa_match_16(G(b,16),(PCRE2_SPTR16)c,d,e,f,G(g,16),h,i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a) \
-  r = pcre2_get_error_message_16(a,(PCRE2_UCHAR16 *)errorbuffer,errorbuffer_size/2)
+  r = pcre2_get_error_message_16(a,(PCRE2_UCHAR16 *)errorbuffer,PCRE2_ERROR_MAX_LENGTH)
 #define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_16(G(b,16))
 #define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
   r = pcre2_get_match_data_heapframes_size_16(G(a,16))
@@ -2504,7 +2503,7 @@ the three different cases. */
 #define PCRE2_DFA_MATCH(a,b,c,d,e,f,g,h,i,j) \
   a = pcre2_dfa_match_32(G(b,32),(PCRE2_SPTR32)c,d,e,f,G(g,32),h,i,j)
 #define PCRE2_GET_ERROR_MESSAGE(r,a) \
-  r = pcre2_get_error_message_32(a,(PCRE2_UCHAR32 *)errorbuffer,errorbuffer_size/4)
+  r = pcre2_get_error_message_32(a,(PCRE2_UCHAR32 *)errorbuffer,PCRE2_ERROR_MAX_LENGTH)
 #define PCRE2_GET_OVECTOR_COUNT(a,b) a = pcre2_get_ovector_count_32(G(b,32))
 #define PCRE2_GET_MATCH_DATA_HEAPFRAMES_SIZE(r,a) \
   r = pcre2_get_match_data_heapframes_size_32(G(a,32))

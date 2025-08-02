@@ -581,7 +581,7 @@ for bmode in "$test8" "$test16" "$test32"; do
       $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput2 testoutput$bits$opt/testoutput2
       saverc=$?
       if [ $saverc = 0 ] ; then
-        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt -error -80,-62,-2,-1,0,100,101,191,300 >>testoutput$bits$opt/testoutput2
+        $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt -error -80,-62,-29,-27,-23,-2,-1,0,100,101,191,212,213,300 >>testoutput$bits$opt/testoutput2
         checkresult $? 2 "$opt"
       else
         checkresult $saverc 2 "$opt"
