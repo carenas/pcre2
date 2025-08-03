@@ -23060,6 +23060,8 @@ Failed: error 217 at offset 27: expected capture group number or name
 # --------------
 
 # End of testinput2
+Error -2147483648: PCRE2_ERROR_BADDATA (unknown error number)
+Error -32767: PCRE2_ERROR_BADDATA (unknown error number)
 Error -80: PCRE2_ERROR_BADDATA (unknown error number)
 Error -62: bad serialized data
 Error -29: bad data value

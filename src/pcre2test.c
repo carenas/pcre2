@@ -1107,7 +1107,7 @@ static uint8_t *dbuffer = NULL;
 
 /* We use a separate buffer for reading error messages out of PCRE2. */
 
-static uint8_t errorbuffer[PCRE2_ERROR_MAX_LENGTH * 4];
+static uint32_t errorbuffer[PCRE2_ERROR_MAX_LENGTH];
 
 
 /* ---------------- Mode-dependent variables -------------------*/
@@ -9913,7 +9913,10 @@ for (e = min; e <= max; e++)
     e = COMPILE_ERROR_BASE;
     continue;
     }
+
+  memset(errorbuffer, 0x55, sizeof(errorbuffer));
   PCRE2_GET_ERROR_MESSAGE(r, e);
+
   if (r <= 0 || PCRE2_ERROR_MAX_LENGTH <= r)
     {
     printf("Error: %d ", e);
@@ -10789,11 +10792,15 @@ if (arg_error != NULL)
   int errcode;
   char *endptr;
   long li;
+  size_t nul_size = (test_mode == 8)? 1 : (test_mode == 16)? 2 : 4;
 
   /* Loop along a list of error numbers. */
 
   for (;;)
     {
+    const uint32_t pcre_nul = 0;
+    int byte_offset;
+    void *nul;
     li = strtol(arg_error, &endptr, 10);
     if (endptr == arg_error || S32OVERFLOW(li) || (*endptr && *endptr != ','))
       {
@@ -10802,8 +10809,22 @@ if (arg_error != NULL)
       goto EXIT;
       }
     errcode = (int)li;
+
+    memset(errorbuffer, 0x55, sizeof(errorbuffer));
     printf("Error %d: ", errcode);
     PCRE2_GET_ERROR_MESSAGE(len, errcode);
+    switch (len)
+      {
+      case PCRE2_ERROR_BADDATA:
+      byte_offset = 0; break;
+      case PCRE2_ERROR_NOMEMORY:
+      byte_offset = (PCRE2_ERROR_MAX_LENGTH - 1) * nul_size; break;
+      default:
+      byte_offset = len * nul_size; break;
+      }
+    nul = (char *)errorbuffer + byte_offset;
+    if (memcmp(nul, &pcre_nul, nul_size))
+      printf("no NUL: ");
     if (len <= 0 || PCRE2_ERROR_MAX_LENGTH <= len)
       print_error_from_error_code(len, 0);
     else

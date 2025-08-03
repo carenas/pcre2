@@ -362,6 +362,13 @@ find_arrerror(void *p, int n, int *find_error)
   return find_strerror(compile_texts[element], n % 64, find_error);
 }
 
+static int
+generate_baddata(PCRE2_UCHAR *buffer)
+{
+*buffer = 0;
+return PCRE2_ERROR_BADDATA;
+}
+
 /*************************************************
 *            Return error message                *
 *************************************************/
@@ -389,24 +396,20 @@ int n, rc = 0, e = FIND_NONE;
 
 if (size == 0) return PCRE2_ERROR_NOMEMORY;
 
-if (enumber >= COMPILE_ERROR_BASE)  /* Compile error */
+if (enumber >= COMPILE_ERROR_BASE)         /* Compile error */
   {
   n = enumber - COMPILE_ERROR_BASE;
   message = find_arrerror((void *)compile_error_texts, n, &e);
   }
-else if (enumber < 0)               /* Match or UTF error */
+else if (INT_MIN < enumber && enumber < 0) /* Auxiliary or UTF error */
   {
   n = -enumber;
   message = find_strerror(match_error_texts, n, &e);
   }
-else                                /* Invalid error number */
-  {
-  *buffer = 0;
-  return PCRE2_ERROR_BADDATA;
-  }
+else return generate_baddata(buffer);        /* Invalid error number */
 
 PCRE2_ASSERT(message != NULL || (message == NULL && e != FIND_OVERLONG));
-if (message == NULL) return PCRE2_ERROR_BADDATA;
+if (message == NULL) return generate_baddata(buffer);
 
 for (i = 0; *message != 0; i++)
   {
