@@ -144,7 +144,7 @@ typedef int BOOL;
 #endif
 
 #define FNBUFSIZ 2048
-#define ERRBUFSIZ 256
+#define ERRBUFSIZ 128
 
 /* Values for the "filenames" variable, which specifies options for file name
 output. The order is important; it is assumed that a file name is wanted for
@@ -1937,7 +1937,7 @@ for (int i = 1; p != NULL; p = p->next, i++)
   if (rc <= PCRE2_ERROR_UTF8_ERR1 &&
       rc >= PCRE2_ERROR_UTF8_ERR21)
     {
-    unsigned char mbuffer[256];
+    PCRE2_UCHAR mbuffer[ERRBUFSIZ];
     PCRE2_SIZE startchar = pcre2_get_startchar(match_data);
     (void)pcre2_get_error_message(rc, mbuffer, sizeof(mbuffer));
     fprintf(stderr, "%s at offset %" SIZ_FORM "\n\n", mbuffer, startchar);
@@ -3874,7 +3874,8 @@ if (p->compiled != NULL)
 /* Handle compile errors */
 
 if (erroffset > patlen) erroffset = patlen;
-pcre2_get_error_message(errcode, errmessbuffer, sizeof(errmessbuffer));
+if (pcre2_get_error_message(errcode, errmessbuffer, sizeof(errmessbuffer)) == PCRE2_ERROR_BADDATA)
+  snprintf((char *)errmessbuffer, sizeof(errmessbuffer), "code %d", errcode);
 
 if (fromfile)
   {
