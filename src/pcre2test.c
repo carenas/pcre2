@@ -10608,39 +10608,6 @@ if (arg_error != NULL)
   char *endptr;
   long li;
 
-/* Ensure the relevant non-8-bit buffer is available. Ensure that it is at
-least 128 code units, because it is used for retrieving error messages. */
-
-#ifdef SUPPORT_PCRE2_16
-  if (test_mode == PCRE16_MODE)
-    {
-    pbuffer16_size = 256;
-    pbuffer16 = (uint16_t *)malloc(pbuffer16_size);
-    if (pbuffer16 == NULL)
-      {
-      fprintf(stderr, "pcre2test: malloc(%" SIZ_FORM ") failed for pbuffer16\n",
-        pbuffer16_size);
-      yield = 1;
-      goto EXIT;
-      }
-    }
-#endif
-
-#ifdef SUPPORT_PCRE2_32
-  if (test_mode == PCRE32_MODE)
-    {
-    pbuffer32_size = 512;
-    pbuffer32 = (uint32_t *)malloc(pbuffer32_size);
-    if (pbuffer32 == NULL)
-      {
-      fprintf(stderr, "pcre2test: malloc(%" SIZ_FORM ") failed for pbuffer32\n",
-        pbuffer32_size);
-      yield = 1;
-      goto EXIT;
-      }
-    }
-#endif
-
   /* Loop along a list of error numbers. */
 
   for (;;)
