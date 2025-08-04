@@ -61,7 +61,6 @@ it references only the enabled library functions. */
 #endif
 
 
-
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
@@ -975,6 +974,12 @@ table itself easier to read. */
 #define BACKSLASH_C 1
 #endif
 
+#ifdef PCRE2_DEBUG
+#define DEBUG_ENABLED 1
+#else
+#define DEBUG_ENABLED 0
+#endif
+
 typedef struct coptstruct {
   const char *name;
   uint32_t    type;
@@ -991,6 +996,7 @@ enum { CONF_BSR,
 static coptstruct coptlist[] = {
   { "backslash-C", CONF_FIX, BACKSLASH_C },
   { "bsr",         CONF_BSR, PCRE2_CONFIG_BSR },
+  { "debug",       CONF_FIX, DEBUG_ENABLED },
   { "ebcdic",      CONF_FIX, SUPPORT_EBCDIC },
   { "ebcdic-io",   CONF_FIX, EBCDIC_IO },
   { "ebcdic-nl25", CONF_FIX, SUPPORT_EBCDIC_NL25 },
@@ -1006,6 +1012,7 @@ static coptstruct coptlist[] = {
 
 #define COPTLISTCOUNT sizeof(coptlist)/sizeof(coptstruct)
 
+#undef DEBUG_ENABLED
 #undef SUPPORT_8
 #undef SUPPORT_16
 #undef SUPPORT_32
@@ -9723,6 +9730,7 @@ printf("  -C arg        show a specific compile-time option and exit with its\n"
 printf("                  value if numeric (else 0). The arg can be:\n");
 printf("     backslash-C    use of \\C is enabled [0, 1]\n");
 printf("     bsr            \\R type [ANYCRLF, ANY]\n");
+printf("     debug          compiled with debug enabled [0, 1]\n");
 printf("     ebcdic         compiled for EBCDIC character code [0, 1]\n");
 printf("     ebcdic-io      if compiled for EBCDIC, whether pcre2test's input\n");
 printf("                      and output is EBCDIC or ASCII [0, 1]\n");
@@ -9759,7 +9767,176 @@ printf("  -malloc       exercise malloc() failures\n");
 printf("  -v|--version  show PCRE2 version and exit\n");
 }
 
+static void print_error_from_error_code(int r, int lf)
+{
+switch (r)
+  {
+  case PCRE2_ERROR_BADDATA:
+  printf("PCRE2_ERROR_BADDATA (unknown error number)");
+  break;
 
+  case PCRE2_ERROR_NOMEMORY:
+  printf("PCRE2_ERROR_NOMEMORY (buffer too small)");
+  break;
+
+  case 0:
+  printf("Unexpected empty error message (zero length)");
+
+  default:
+  if (r > 0)
+    printf("Error message likely to truncate (maybe a bug)");
+  else
+    printf("Unexpected return (%d) from pcre2_get_error_message()", r);
+  break;
+  }
+if (lf) putc('\n', stdout);
+}
+
+#ifdef PCRE2_DEBUG
+
+#ifdef SUPPORT_PCRE2_8
+static int
+handle_error_debug_option(void)
+{
+PCRE2_SIZE size, eo;
+pcre2_match_data_8 *md;
+pcre2_code_8 *re;
+int e, c = 0;
+PCRE2_SIZE mo = 0;
+uint32_t match_options = PCRE2_NOTEMPTY;
+int min = 0, max = 0, rc = 0;
+PCRE2_UCHAR8 *subject = NULL;
+PCRE2_SPTR8 pattern = (PCRE2_SPTR8)"(*BSR_ANYCRLF)^#define PCRE2_ERROR_\\w+\\s+(?:\\(\\s*(-?\\d+)\\s*\\)|(-?\\d+)).*\\R?";
+FILE *f = fopen("src/pcre2.h", "r");
+
+if (f == NULL) f = fopen("pcre2.h", "r");
+if (f == NULL)
+  {
+  const char *env = getenv("src_dir");
+  if (env != NULL)
+    {
+    size_t ps = strlen(env) + 8 + 1;
+
+    /* Just do a sanity check to avoid abuse */
+    if (ps < 4096)
+      {
+      char *p = malloc(ps);
+      PCRE2_ASSERT(p != NULL);
+      sprintf(p, "%s/pcre2.h", env);
+      f = fopen(p, "r");
+      }
+    }
+  if (f == NULL)
+    {
+    rc = 1;
+    goto EXIT;
+    }
+  }
+
+fseek(f, 0, SEEK_END);
+size = ftell(f);
+rewind(f);
+subject = malloc(size);
+if (subject == NULL)
+  {
+  rc = 1;
+  goto EXIT;
+  }
+fread(subject, 1, size, f);
+if (ferror(f))
+  {
+  rc = 1;
+  goto EXIT;
+  }
+
+re = pcre2_compile_8(pattern, strlen((char *)pattern), PCRE2_MULTILINE,
+       &e, &eo, NULL);
+pcre2_jit_compile_8(re, PCRE2_JIT_COMPLETE);
+md = pcre2_match_data_create_from_pattern_8(re, NULL);
+while (!rc)
+{
+  int m = pcre2_match_8(re, subject, size, mo, match_options, md, NULL);
+
+  /* This should not happen normally, as we peek into the next line,
+  and the subject is well known, but... */
+  if (m == PCRE2_ERROR_NOMATCH)
+    {
+    if ((match_options & PCRE2_ANCHORED) != 0) match_options &= ~PCRE2_ANCHORED;
+    m = pcre2_match_8(re, subject, size, mo, match_options, md, NULL);
+    }
+
+  /* The expression has one capture but two possible alternates. It could
+  be simplified but oddly this might had been faster. */
+
+  if (2 <= m && m <= 3)
+    {
+    PCRE2_SIZE *ovector = pcre2_get_ovector_pointer_8(md);
+    uint32_t capture_start_index;
+    int n;
+
+    capture_start_index = (m == 3)? 4 : 2;
+
+    PCRE2_ASSERT(ovector[capture_start_index] != PCRE2_UNSET);
+
+    n = strtol((const char *)subject + ovector[capture_start_index], NULL, 10);
+    if (n < min) min = n;
+    if (n > max) max = n;
+
+    if (ovector[1] < size) mo = ovector[1]; else break;
+    /* take a peek and assume next line should also match */
+    if (subject[mo] == '#')
+      match_options |= PCRE2_ANCHORED;
+    else
+      match_options ^= PCRE2_ANCHORED;
+    }
+  else
+    {
+    if (m == PCRE2_ERROR_NOMATCH && (match_options & PCRE2_ANCHORED) == 0)
+      break;
+    else
+      rc = 1;
+    }
+}
+
+pcre2_match_data_free_8(md);
+pcre2_code_free_8(re);
+if (rc) goto EXIT;
+
+PCRE2_ASSERT(min < 0 && COMPILE_ERROR_BASE < max);
+/* Loop through all the error codes found */
+for (e = min; e <= max; e++)
+  {
+  int r;
+
+  if (e == 0)
+    {
+    e = COMPILE_ERROR_BASE;
+    continue;
+    }
+  PCRE2_GET_ERROR_MESSAGE(r, e);
+  if (r <= 0 || PCRE2_ERROR_MAX_LENGTH <= r)
+    {
+    printf("Error: %d ", e);
+    print_error_from_error_code(r, 1);
+    c++;
+    }
+  }
+if (c) rc = 1;
+
+EXIT:
+free(subject);
+if (f != NULL) fclose(f);
+return rc;
+}
+#else
+static int
+handle_error_debug_option(void)
+{
+return 0;
+}
+#endif
+
+#endif
 
 /*************************************************
 *             Handle -C option                   *
@@ -9960,7 +10137,6 @@ printf("  pcre2test has neither libreadline nor libedit support\n");
 
 return 0;
 }
-
 
 /*************************************************
 *      Format one property/script list item      *
@@ -10560,6 +10736,13 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
 
   else if (strcmp(arg, "-error") == 0)
     {
+#ifdef PCRE2_DEBUG
+    if (argc <= 2)
+      {
+      yield = handle_error_debug_option();
+      goto EXIT;
+      }
+#endif
     arg_error = argv[op+1];
     goto CHECK_VALUE_EXISTS;
     }
@@ -10612,7 +10795,7 @@ if (arg_error != NULL)
   for (;;)
     {
     li = strtol(arg_error, &endptr, 10);
-    if (S32OVERFLOW(li) || (*endptr != 0 && *endptr != ','))
+    if (endptr == arg_error || S32OVERFLOW(li) || (*endptr && *endptr != ','))
       {
       fprintf(stderr, "** \"%s\" is not a valid error number list\n", arg_error);
       yield = 1;
@@ -10621,28 +10804,13 @@ if (arg_error != NULL)
     errcode = (int)li;
     printf("Error %d: ", errcode);
     PCRE2_GET_ERROR_MESSAGE(len, errcode);
-    if (len < 0)
-      {
-      switch (len)
-        {
-        case PCRE2_ERROR_BADDATA:
-        printf("PCRE2_ERROR_BADDATA (unknown error number)");
-        break;
-
-        case PCRE2_ERROR_NOMEMORY:
-        printf("PCRE2_ERROR_NOMEMORY (buffer too small)");
-        break;
-
-        default:
-        printf("Unexpected return (%d) from pcre2_get_error_message()", len);
-        break;
-        }
-      }
+    if (len <= 0 || PCRE2_ERROR_MAX_LENGTH <= len)
+      print_error_from_error_code(len, 0);
     else
       {
       PCHARSV(errorbuffer, 0, len, FALSE, stdout);
       }
-    printf("\n");
+    putc('\n', stdout);
     if (*endptr == 0) goto EXIT;
     arg_error = endptr + 1;
     }

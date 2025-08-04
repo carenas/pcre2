@@ -138,7 +138,7 @@ $cf -u /dev/null /dev/null 2>/dev/null && cf="$cf -u"
 
 # Find the test data
 
-if [ -n "$srcdir" -a -d "$srcdir" ] ; then
+if [ -n "$srcdir" ] && [ -d "$srcdir" ] ; then
   testdata="$srcdir/testdata"
 elif [ -d "./testdata" ] ; then
   testdata=./testdata
@@ -446,6 +446,9 @@ else
   fi
 fi
 
+$sim $pcre2test -C debug >/dev/null
+debug=$?
+
 # UTF support is implied by Unicode support, and it always applies to all bit
 # sizes if both are supported; we can't have UTF-8 support without UTF-16 or
 # UTF-32 support.
@@ -576,6 +579,22 @@ for bmode in "$test8" "$test16" "$test32"; do
 
   if [ $do2 = yes ] ; then
     echo $title2 "(excluding UTF-$bits)"
+
+    # First check for problems with error messages
+    if [ $debug = 1 ] ; then
+      $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode -error >testtry
+      if [ $? -ne 0 ] ; then
+        if [ -f testtry ] ; then
+          echo "The following error codes are not safe to release"
+          cat testtry
+          exit 1
+        else
+          echo "Cannot test error codes in this environment, maybe need"
+          echo "to set the src_dir environment variable to locate pcre2.h?"
+        fi
+      fi
+    fi
+
     cp $testdata/testbtables .
     for opt in "" $jitopt; do
       $sim $valgrind ${opt:+$vjs} $pcre2test $globalopts $bmode $opt $testdata/testinput2 testoutput$bits$opt/testoutput2
