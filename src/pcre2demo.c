@@ -73,7 +73,7 @@ PCRE2_SPTR pattern;     /* PCRE2_SPTR is a pointer to unsigned code units of */
 PCRE2_SPTR subject;     /* the appropriate width (in this case, 8 bits). */
 PCRE2_SPTR name_table;
 
-int errornumber;
+int error_number;
 int find_all, caseless_match;
 int i;
 int rc;
@@ -81,7 +81,7 @@ int rc;
 uint32_t namecount;
 uint32_t name_entry_size;
 
-PCRE2_SIZE erroroffset;
+PCRE2_SIZE error_offset;
 PCRE2_SIZE *ovector;
 PCRE2_SIZE ovector_last[2];
 PCRE2_SIZE subject_length;
@@ -141,18 +141,46 @@ re = pcre2_compile(
   pattern,               /* the pattern */
   PCRE2_ZERO_TERMINATED, /* indicates pattern is zero-terminated */
   caseless_match,        /* possibly enable caseless */
-  &errornumber,          /* for error number */
-  &erroroffset,          /* for error offset */
+  &error_number,         /* for error code */
+  &error_offset,         /* for error offset */
   NULL);                 /* use default compile context */
 
 /* Compilation failed: print the error message and exit. */
 
 if (re == NULL)
   {
-  PCRE2_UCHAR buffer[256];
-  pcre2_get_error_message(errornumber, buffer, sizeof(buffer));
-  printf("PCRE2 compilation failed at offset %d: %s\n", (int)erroroffset,
-    buffer);
+  PCRE2_UCHAR buffer[128];
+  int r = pcre2_get_error_message(error_number, buffer, sizeof(buffer));
+
+  /* The buffer has a copy of a textual description of the error code.
+  If the buffer was too small, then `r` has a negative number error code
+  and the message was truncated, but that shouldn't be an issue here,
+  because messages are documented to be at most 120 characters long,
+  excluding the final NUL for a valid C string. */
+
+  printf("PCRE2 compilation failed at offset %d", (int)error_offset);
+
+  /* Note that the following code assumes the 8-bit library is used
+  and relies on PCRE2_UCHAR having the same width than `char`. */
+  switch (r)
+    {
+    case PCRE2_ERROR_BADDATA:
+    printf(" with error: %d\n", error_number); break;
+    case PCRE2_ERROR_NOMEMORY:
+
+    /* The error buffer is always terminated so this is safe */
+    printf(": %s\n", buffer); break;
+
+    default:
+
+    /* The number of characters in the error message was returned so
+    it can be used to manipulate it, like is shown below. Note that
+    alternatively could use the fact that the last character is NUL
+    to get a similar effect. */
+
+    printf(": %.*s\n", r, buffer); break;
+    }
+
   return 1;
   }
 
