@@ -23070,7 +23070,9 @@ Error -1: no match
 Error 0: PCRE2_ERROR_BADDATA (unknown error number)
 Error 100: no error
 Error 101: \ at end of pattern
+Error 164: non-octal character in \o{} (closing brace missing?)
 Error 191: PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not allowed in UTF-16 mode
 Error 212: missing terminating ] for extended character class (note '[' must be escaped under PCRE2_ALT_EXTENDED_CLASS)
 Error 213: unexpected expression in extended character class (no preceding operator)
+Error 228: PCRE2_ERROR_BADDATA (unknown error number)
 Error 300: PCRE2_ERROR_BADDATA (unknown error number)

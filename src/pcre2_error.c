@@ -50,96 +50,100 @@ POSSIBILITY OF SUCH DAMAGE.
 at COMPILE_ERROR_BASE (100).
 
 This used to be a table of strings, but in order to reduce the number of
-relocations needed when a shared library is loaded dynamically, it is now one
-long string. We cannot use a table of offsets, because the lengths of inserts
-such as XSTRING(MAX_NAME_SIZE) are not known. Instead,
-pcre2_get_error_message() counts through to the one it wants - this isn't a
+relocations needed when a shared library is loaded dynamically, it is now an
+array of really long strings (expected to be up to 4K each as per C99).
+
+We cannot use a table of offsets, because the lengths of inserts such as
+XSTRING(MAX_NAME_SIZE) are not known. Instead, pcre2_get_error_message()
+counts through to the one it wants using a couple of helpers - this isn't a
 performance issue because these strings are used only when there is an error.
 
 Each substring ends with \0 to insert a NUL character. This includes the final
 substring, so that the whole string ends with \0\0, which can be detected when
 counting through. */
 
-static const unsigned char compile_error_texts[] =
+static const unsigned char * const compile_error_texts[] = {
+  /* 100 */ (const unsigned char *const)
   "no error\0"
   "\\ at end of pattern\0"
   "\\c at end of pattern\0"
   "unrecognized character follows \\\0"
   "numbers out of order in {} quantifier\0"
-  /* 5 */
+  /* 105 */
   "number too big in {} quantifier\0"
   "missing terminating ] for character class\0"
   "escape sequence is invalid in character class\0"
   "range out of order in character class\0"
   "quantifier does not follow a repeatable item\0"
-  /* 10 */
+  /* 110 */
   "internal error: unexpected repeat\0"
   "unrecognized character after (? or (?-\0"
   "POSIX named classes are supported only within a class\0"
   "POSIX collating elements are not supported\0"
   "missing closing parenthesis\0"
-  /* 15 */
+  /* 115 */
   "reference to non-existent subpattern\0"
   "pattern passed as NULL with non-zero length\0"
   "unrecognised compile-time option bit(s)\0"
   "missing ) after (?# comment\0"
   "parentheses are too deeply nested\0"
-  /* 20 */
+  /* 120 */
   "regular expression is too large\0"
   "failed to allocate heap memory\0"
   "unmatched closing parenthesis\0"
   "internal error: code overflow\0"
   "missing closing parenthesis for condition\0"
-  /* 25 */
+  /* 125 */
   "length of lookbehind assertion is not limited\0"
   "a relative value of zero is not allowed\0"
   "conditional subpattern contains more than two branches\0"
   "atomic assertion expected after (?( or (?(?C)\0"
   "digit expected after (?+\0"
-  /* 30 */
+  /* 130 */
   "unknown POSIX class name\0"
   "internal error in pcre2_study(): should not occur\0"
   "this version of PCRE2 does not have Unicode support\0"
   "parentheses are too deeply nested (stack check)\0"
   "character code point value in \\x{} or \\o{} is too large\0"
-  /* 35 */
+  /* 135 */
   "lookbehind is too complicated\0"
   "\\C is not allowed in a lookbehind assertion in UTF-" XSTRING(PCRE2_CODE_UNIT_WIDTH) " mode\0"
   "PCRE2 does not support \\F, \\L, \\l, \\N{name}, \\U, or \\u\0"
   "number after (?C is greater than 255\0"
   "closing parenthesis for (?C expected\0"
-  /* 40 */
+  /* 140 */
   "invalid escape sequence in (*VERB) name\0"
   "unrecognized character after (?P\0"
   "syntax error in subpattern name (missing terminator?)\0"
   "two named subpatterns have the same name (PCRE2_DUPNAMES not set)\0"
   "subpattern name must start with a non-digit\0"
-  /* 45 */
+  /* 145 */
   "this version of PCRE2 does not have support for \\P, \\p, or \\X\0"
   "malformed \\P or \\p sequence\0"
   "unknown property after \\P or \\p\0"
   "subpattern name is too long (maximum " XSTRING(MAX_NAME_SIZE) " code units)\0"
   "too many named subpatterns (maximum " XSTRING(MAX_NAME_COUNT) ")\0"
-  /* 50 */
+  /* 150 */
   "invalid range in character class\0"
   "octal value is greater than \\377 in 8-bit non-UTF-8 mode\0"
   "internal error: overran compiling workspace\0"
   "internal error: previously-checked referenced subpattern not found\0"
   "DEFINE subpattern contains more than one branch\0"
-  /* 55 */
+  /* 155 */
   "missing opening brace after \\o\0"
   "internal error: unknown newline setting\0"
   "\\g is not followed by a braced, angle-bracketed, or quoted name/number or by a plain number\0"
   "(?R (recursive pattern call) must be followed by a closing parenthesis\0"
   /* "an argument is not allowed for (*ACCEPT), (*FAIL), or (*COMMIT)\0" */
   "obsolete error (should not occur)\0"  /* Was the above */
-  /* 60 */
+  /* 160 */
   "(*VERB) not recognized or malformed\0"
   "subpattern number is too big\0"
   "subpattern name expected\0"
   "internal error: parsed pattern overflow\0"
+, (const unsigned char *const)
   "non-octal character in \\o{} (closing brace missing?)\0"
-  /* 65 */
+  /* 165 */
   "different names for subpatterns of the same number are not allowed\0"
   "(*MARK) must have an argument\0"
   "non-hex character in \\x{} (closing brace missing?)\0"
@@ -149,67 +153,72 @@ static const unsigned char compile_error_texts[] =
   "\\c must be followed by a letter or one of @[\\]^_?\0"
 #endif
   "\\k is not followed by a braced, angle-bracketed, or quoted name\0"
-  /* 70 */
+  /* 170 */
   "internal error: unknown meta code in check_lookbehinds()\0"
   "\\N is not supported in a class\0"
   "callout string is too long\0"
   "disallowed Unicode code point (>= 0xd800 && <= 0xdfff)\0"
   "using UTF is disabled by the application\0"
-  /* 75 */
+  /* 175 */
   "using UCP is disabled by the application\0"
   "name is too long in (*MARK), (*PRUNE), (*SKIP), or (*THEN)\0"
   "character code point value in \\u.... sequence is too large\0"
   "digits missing after \\x or in \\x{} or \\o{} or \\N{U+}\0"
   "syntax error or number too big in (?(VERSION condition\0"
-  /* 80 */
+  /* 180 */
   "internal error: unknown opcode in auto_possessify()\0"
   "missing terminating delimiter for callout with string argument\0"
   "unrecognized string delimiter follows (?C\0"
   "using \\C is disabled by the application\0"
   "(?| and/or (?J: or (?x: parentheses are too deeply nested\0"
-  /* 85 */
+  /* 185 */
   "using \\C is disabled in this PCRE2 library\0"
   "regular expression is too complicated\0"
   "lookbehind assertion is too long\0"
   "pattern string is longer than the limit set by the application\0"
   "internal error: unknown code in parsed pattern\0"
-  /* 90 */
+  /* 190 */
   "internal error: bad code value in parsed_skip()\0"
   "PCRE2_EXTRA_ALLOW_SURROGATE_ESCAPES is not allowed in UTF-16 mode\0"
   "invalid option bits with PCRE2_LITERAL\0"
   "\\N{U+dddd} is supported only in Unicode (UTF) mode\0"
   "invalid hyphen in option setting\0"
-  /* 95 */
+  /* 195 */
   "(*alpha_assertion) not recognized\0"
   "script runs require Unicode support, which this version of PCRE2 does not have\0"
   "too many capturing groups (maximum 65535)\0"
   "octal digit missing after \\0 (PCRE2_EXTRA_NO_BS0 is set)\0"
   "\\K is not allowed in lookarounds (but see PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK)\0"
-  /* 100 */
+  /* 200 */
   "branch too long in variable-length lookbehind assertion\0"
   "compiled pattern would be longer than the limit set by the application\0"
   "octal value given by \\ddd is greater than \\377 (forbidden by PCRE2_EXTRA_PYTHON_OCTAL)\0"
   "using callouts is disabled by the application\0"
   "PCRE2_EXTRA_TURKISH_CASING require Unicode (UTF or UCP) mode\0"
-  /* 105 */
+  /* 205 */
   "PCRE2_EXTRA_TURKISH_CASING requires UTF in 8-bit mode\0"
   "PCRE2_EXTRA_TURKISH_CASING and PCRE2_EXTRA_CASELESS_RESTRICT are not compatible\0"
   "extended character class nesting is too deep\0"
   "invalid operator in extended character class\0"
   "unexpected operator in extended character class (no preceding operand)\0"
-  /* 110 */
+  /* 210 */
   "expected operand after operator in extended character class\0"
   "square brackets needed to clarify operator precedence in extended character class\0"
   "missing terminating ] for extended character class (note '[' must be escaped under PCRE2_ALT_EXTENDED_CLASS)\0"
   "unexpected expression in extended character class (no preceding operator)\0"
   "empty expression in extended character class\0"
-  /* 115 */
+  /* 215 */
   "terminating ] with no following closing parenthesis in (?[...]\0"
   "unexpected character in (?[...]) extended character class\0"
   "expected capture group number or name\0"
   "missing opening parenthesis\0"
   "syntax error in subpattern number (missing terminator?)\0"
-  ;
+};
+
+/* When adding a new error, make sure it is less than 120 characters long and
+create a new 64 count element if its associated number requires it */
+
+#define COMPILE_ERROR_TEXTS_LIMIT (int)(sizeof(compile_error_texts)/sizeof(compile_error_texts[0]))
 
 /* Match-time and UTF error texts are in the same format. */
 
@@ -335,6 +344,24 @@ for (; n > 0; n--)
 return p;
 }
 
+/* 64 is the number of messages on each element of compile_error_texts, which
+are expected to be shorter than 64 characters in average, resulting in a nice
+4K chunk that is easy to handle by the OS and conforms with the restrictions
+from C99 regarding string sizes */
+
+static const unsigned char *
+find_arrerror(void *p, int n, int *find_error)
+{
+  const unsigned char **compile_texts = p;
+  int element = n / 64;
+  if (element >= COMPILE_ERROR_TEXTS_LIMIT)
+    {
+    *find_error = FIND_BADDATA;
+    return NULL;
+    }
+  return find_strerror(compile_texts[element], n % 64, find_error);
+}
+
 /*************************************************
 *            Return error message                *
 *************************************************/
@@ -365,7 +392,7 @@ if (size == 0) return PCRE2_ERROR_NOMEMORY;
 if (enumber >= COMPILE_ERROR_BASE)  /* Compile error */
   {
   n = enumber - COMPILE_ERROR_BASE;
-  message = find_strerror(compile_error_texts, n, &e);
+  message = find_arrerror((void *)compile_error_texts, n, &e);
   }
 else if (enumber < 0)               /* Match or UTF error */
   {
