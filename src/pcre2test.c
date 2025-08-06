@@ -9781,6 +9781,7 @@ switch (r)
 
   case 0:
   printf("Unexpected empty error message (zero length)");
+  break;
 
   default:
   if (r > 0)
