@@ -391,7 +391,7 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_get_error_message(int enumber, PCRE2_UCHAR *buffer, PCRE2_SIZE size)
 {
 const unsigned char *message;
-PCRE2_SIZE i;
+unsigned i;
 int n, rc = 0, e = FIND_NONE;
 
 if (size == 0) return PCRE2_ERROR_NOMEMORY;
@@ -418,6 +418,7 @@ for (i = 0; *message != 0; i++)
     rc = PCRE2_ERROR_NOMEMORY;
     break;
     }
+  if (i >= INT_MAX) return generate_baddata(buffer + i);
   buffer[i] = *message++;
   }
 
@@ -426,7 +427,7 @@ for (i = 0; *message != 0; i++)
 then we are in the "force EBCDIC 1047" mode. I have chosen to add a few lines
 here to translate the error strings on the fly, rather than require the string
 literals above to be written out arduously using the "STR_XYZ" macros. */
-for (PCRE2_SIZE j = 0; j < i; ++j)
+for (unsigned j = 0; j < i; ++j)
   buffer[j] = PRIV(ascii_to_ebcdic_1047)[buffer[j]];
 #endif
 
