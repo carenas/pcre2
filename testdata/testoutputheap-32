@@ -4,7 +4,6 @@
 Memory allocation (code space): 52
 Frame size for pcre2_match(): 128
     abcd\=memory
-malloc  20480
  0: abcd
     abcd\=find_limits
 Minimum heap limit = 1
@@ -16,8 +15,6 @@ Minimum depth limit = 2
 Memory allocation (code space): 2588
 Frame size for pcre2_match(): 624
     abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcX\=memory
-malloc  40960
-free unremembered block
 No match
     abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcX\=find_limits
 Minimum heap limit = 22
@@ -32,10 +29,6 @@ Frame size for pcre2_match(): 144
  0: abcd
  1: cd
     abcd\=memory,ovector=0
-free    40960
-free unremembered block
-malloc    128
-malloc  20480
  0: abcd
  1: cd
 

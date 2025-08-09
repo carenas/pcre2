@@ -1023,6 +1023,18 @@ enum force_encoding {
 
 /* ----------------------- Static variables ------------------------ */
 
+typedef struct malloc_entry {
+  void   *p;
+  size_t size;
+} malloc_entry;
+
+typedef struct malloc_struct {
+  malloc_entry list[MALLOCLISTSIZE];
+  uint32_t nr;
+  int count;
+  int countdown_until_failure;
+} malloc_struct;
+
 static FILE *infile;
 static FILE *outfile;
 
@@ -1033,9 +1045,9 @@ static size_t jit_stack_size = 0;
 static BOOL first_callout;
 static BOOL jit_was_used;
 static BOOL restrict_for_perl_test = FALSE;
-static BOOL show_memory = FALSE;
 static BOOL preprocess_only = FALSE;
 static BOOL inside_if = FALSE;
+static BOOL show_memory = FALSE;
 static BOOL malloc_testing = FALSE;
 
 static int jitrc;                             /* Return from JIT compile */
@@ -1069,9 +1081,11 @@ static datctl dat_datctl;
 static void *patstack[PATSTACKSIZE];
 static int patstacknext = 0;
 
-static void *malloclist[MALLOCLISTSIZE];
-static PCRE2_SIZE malloclistlength[MALLOCLISTSIZE];
-static uint32_t malloclistptr = 0;
+/* If your compiler has problems with the following assignment, please report
+an issue to https://github.com/PCRE2Project/pcre2/
+
+To get around it, can simply remove the initialization. */
+static malloc_struct malloclist = { .countdown_until_failure = INT_MAX };
 
 #ifdef SUPPORT_PCRE2_8
 static regex_t preg = { NULL, NULL, 0, 0, 0, 0 };
@@ -2988,76 +3002,74 @@ return sys_errlist[n];
 *            Local memory functions              *
 *************************************************/
 
-static int mallocs_until_failure = INT_MAX;
-static int mallocs_called = 0;
-
 /* Alternative memory functions, to test functionality. */
 
-static void *my_malloc(size_t size, void *data)
+static void *pcre2test_malloc(size_t size, void *data)
 {
 void *block;
+malloc_struct *control = data;
 
-(void)data;
-
-mallocs_called++;
-if (mallocs_until_failure != INT_MAX && mallocs_until_failure-- <= 0)
+PCRE2_ASSERT(control != NULL);
+if (control->countdown_until_failure != INT_MAX &&
+    control->countdown_until_failure-- <= 0)
   return NULL;
 
 block = malloc(size);
+control->count++;
 if (show_memory)
   {
-  if (block == NULL)
-    {
-    fprintf(outfile, "** malloc() failed for %" SIZ_FORM "\n", size);
-    }
+  int r;
+
+  if (block == NULL) fprintf(stderr, "** malloc() failed for %" SIZ_FORM "\n", size);
   else
     {
-    fprintf(outfile, "malloc  %5" SIZ_FORM, size);
+    fprintf(stderr, "malloc  %6" SIZ_FORM, size);
 #ifdef DEBUG_SHOW_MALLOC_ADDRESSES
-    fprintf(outfile, " %p", block);   /* Not portable */
+    fprintf(stderr, " %p", block);   /* Not portable */
 #endif
-    if (malloclistptr < MALLOCLISTSIZE)
+    if (control->nr < MALLOCLISTSIZE)
       {
-      malloclist[malloclistptr] = block;
-      malloclistlength[malloclistptr++] = size;
+      control->list[control->nr].p = block;
+      control->list[control->nr++].size = size;
       }
-    else
-      fprintf(outfile, " (not remembered)");
-    fprintf(outfile, "\n");
+    else fputs(" (untracked)", stderr);
+    putc('\n', stderr);
     }
   }
 return block;
 }
 
-static void my_free(void *block, void *data)
+static void pcre2test_free(void *block, void *data)
 {
-(void)data;
-if (show_memory && block != NULL)
+malloc_struct *control = data;
+if (show_memory)
   {
-  uint32_t i, j;
-  BOOL found = FALSE;
-
-  fprintf(outfile, "free");
-  for (i = 0; i < malloclistptr; i++)
+  fputs("free", stderr);
+  if (block == NULL) fputs("      NULL", stderr);
+  else
     {
-    if (block == malloclist[i])
+    BOOL found = FALSE;
+
+    PCRE2_ASSERT(control != NULL);
+    if (control->nr) for (uint32_t i = control->nr; i-- > 0;)
       {
-      fprintf(outfile, "    %5" SIZ_FORM, malloclistlength[i]);
-      malloclistptr--;
-      for (j = i; j < malloclistptr; j++)
-        {
-        malloclist[j] = malloclist[j+1];
-        malloclistlength[j] = malloclistlength[j+1];
-        }
-      found = TRUE;
-      break;
+      if (block == control->list[i].p)
+	{
+	fprintf(stderr, "    %6" SIZ_FORM, control->list[i].size);
+        if (i < control->nr - 1)
+          memmove(&control->list[i], &control->list[i+1],
+            (control->nr - i - 1) * sizeof(malloc_entry));
+        control->nr--;
+	found = TRUE;
+	break;
+	}
       }
-    }
-  if (!found) fprintf(outfile, " unremembered block");
+    if (!found) fprintf(stderr, " untracked");
 #ifdef DEBUG_SHOW_MALLOC_ADDRESSES
-  fprintf(outfile, " %p", block);  /* Not portable */
+    fprintf(stderr, " %p", block);   /* Not portable */
 #endif
-  fprintf(outfile, "\n");
+    }
+  putc('\n', stderr);
   }
 free(block);
 }
@@ -3384,7 +3396,7 @@ static size_t strlen16(PCRE2_SPTR16 p)
 {
 PCRE2_SPTR16 pp = p;
 while (*pp != 0) pp++;
-return (int)(pp - p);
+return (pp - p);
 }
 #endif  /* SUPPORT_PCRE2_16 */
 
@@ -3399,7 +3411,7 @@ static size_t strlen32(PCRE2_SPTR32 p)
 {
 PCRE2_SPTR32 pp = p;
 while (*pp != 0) pp++;
-return (int)(pp - p);
+return (pp - p);
 }
 #endif  /* SUPPORT_PCRE2_32 */
 
@@ -6720,7 +6732,7 @@ if (timeit > 0)
 
 /* A final compile that is used "for real". */
 
-mallocs_called = 0;
+malloclist.count = 0;
 PCRE2_COMPILE(compiled_code, use_pbuffer, patlen,
   pat_patctl.options|use_forbid_utf, &errorcode, &erroroffset, use_pat_context);
 
@@ -6728,17 +6740,17 @@ PCRE2_COMPILE(compiled_code, use_pbuffer, patlen,
 
 if (malloc_testing)
   {
-  for (int i = 0, target_mallocs = mallocs_called; i <= target_mallocs; i++)
+  for (int i = 0, target_mallocs = malloclist.count; i <= target_mallocs; i++)
     {
     if (TEST(compiled_code, !=, NULL))
       { SUB1(pcre2_code_free, compiled_code); }
 
     errorcode = 0;
     erroroffset = 0;
-    mallocs_until_failure = i;
+    malloclist.countdown_until_failure = i;
     PCRE2_COMPILE(compiled_code, use_pbuffer, patlen,
       pat_patctl.options|use_forbid_utf, &errorcode, &erroroffset, use_pat_context);
-    mallocs_until_failure = INT_MAX;
+    malloclist.countdown_until_failure = INT_MAX;
 
     if (i < target_mallocs &&
         !(TEST(compiled_code, ==, NULL) && errorcode == PCRE2_ERROR_HEAP_FAILED))
@@ -6830,14 +6842,14 @@ if (TEST(compiled_code, !=, NULL) && pat_patctl.jit != 0)
         ((1000000 / CLOCKS_PER_SEC) * (double)time_taken) / timeit);
     }
 
-  mallocs_called = 0;
+  malloclist.count = 0;
   PCRE2_JIT_COMPILE(jitrc, compiled_code, pat_patctl.jit);
 
   /* For malloc testing, we repeat the compilation. */
 
   if (malloc_testing)
     {
-    for (int i = 0, target_mallocs = mallocs_called; i <= target_mallocs; i++)
+    for (int i = 0, target_mallocs = malloclist.count; i <= target_mallocs; i++)
       {
       SUB1(pcre2_code_free, compiled_code);
       PCRE2_COMPILE(compiled_code, use_pbuffer, patlen,
@@ -6849,9 +6861,9 @@ if (TEST(compiled_code, !=, NULL) && pat_patctl.jit != 0)
         return PR_ABEND;
         }
 
-      mallocs_until_failure = i;
+      malloclist.countdown_until_failure = i;
       PCRE2_JIT_COMPILE(jitrc, compiled_code, pat_patctl.jit);
-      mallocs_until_failure = INT_MAX;
+      malloclist.countdown_until_failure = INT_MAX;
 
       if (i < target_mallocs && jitrc != PCRE2_ERROR_NOMEMORY)
         {
@@ -8914,7 +8926,7 @@ if (dat_datctl.replacement[0] != 0)
   rbptr = ((dat_datctl.control2 & CTL2_NULL_REPLACEMENT) == 0)? rbuffer : NULL;
 
   if (malloc_testing) CLEAR_HEAP_FRAMES();
-  mallocs_called = 0;
+  malloclist.count = 0;
   nsize_input = nsize;
   PCRE2_SUBSTITUTE(rc, compiled_code, pp, arg_ulen, dat_datctl.offset,
     dat_datctl.options|xoptions, match_data, use_dat_context,
@@ -8924,16 +8936,16 @@ if (dat_datctl.replacement[0] != 0)
 
   if (malloc_testing && (dat_datctl.control2 & CTL2_SUBSTITUTE_CALLOUT) == 0)
     {
-    for (int i = 0, target_mallocs = mallocs_called; i <= target_mallocs; i++)
+    for (int i = 0, target_mallocs = malloclist.count; i <= target_mallocs; i++)
       {
       CLEAR_HEAP_FRAMES();
 
-      mallocs_until_failure = i;
+      malloclist.countdown_until_failure = i;
       nsize = nsize_input;
       PCRE2_SUBSTITUTE(rc, compiled_code, pp, arg_ulen, dat_datctl.offset,
         dat_datctl.options|xoptions, match_data, use_dat_context,
         rbptr, rlen, nbuffer, &nsize);
-      mallocs_until_failure = INT_MAX;
+      malloclist.countdown_until_failure = INT_MAX;
 
       if (i < target_mallocs && rc != PCRE2_ERROR_NOMEMORY)
         {
@@ -9120,7 +9132,7 @@ for (gmatched = 0;; gmatched++)
     /* Run a single DFA or NFA match. */
 
     if (malloc_testing) CLEAR_HEAP_FRAMES();
-    mallocs_called = 0;
+    malloclist.count = 0;
     if ((dat_datctl.control & CTL_DFA) != 0)
       {
       if (dfa_workspace == NULL)
@@ -9155,11 +9167,11 @@ for (gmatched = 0;; gmatched++)
 
     if (malloc_testing && (dat_datctl.control & CTL_CALLOUT_NONE) != 0)
       {
-      for (int i = 0, target_mallocs = mallocs_called; i <= target_mallocs; i++)
+      for (int i = 0, target_mallocs = malloclist.count; i <= target_mallocs; i++)
         {
         CLEAR_HEAP_FRAMES();
 
-        mallocs_until_failure = i;
+        malloclist.countdown_until_failure = i;
 
         if ((dat_datctl.control & CTL_DFA) != 0)
           {
@@ -9179,7 +9191,7 @@ for (gmatched = 0;; gmatched++)
               dat_datctl.options | g_notempty, match_data, use_dat_context);
           }
 
-        mallocs_until_failure = INT_MAX;
+        malloclist.countdown_until_failure = INT_MAX;
 
         if (capcount == 0)
           capcount = dat_datctl.oveccount;
@@ -10694,7 +10706,7 @@ max_oveccount = DEFAULT_OVECCOUNT;
 /* Use macros to save a lot of duplication. */
 
 #define CREATECONTEXTS \
-  G(general_context,BITS) = G(pcre2_general_context_create_,BITS)(&my_malloc, &my_free, NULL); \
+  G(general_context,BITS) = G(pcre2_general_context_create_,BITS)(&pcre2test_malloc, &pcre2test_free, &malloclist); \
   G(general_context_copy,BITS) = G(pcre2_general_context_copy_,BITS)(G(general_context,BITS)); \
   G(default_pat_context,BITS) = G(pcre2_compile_context_create_,BITS)(G(general_context,BITS)); \
   G(pat_context,BITS) = G(pcre2_compile_context_copy_,BITS)(G(default_pat_context,BITS)); \
