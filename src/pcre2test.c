@@ -3838,34 +3838,29 @@ return 0;
 *************************************************/
 
 /* This function doubles the size of the input buffer and the buffer for
-keeping an 8-bit copy of patterns (pbuffer8), and copies the current buffers to
-the new ones.
+keeping an 8-bit copy of patterns (pbuffer8).
 
 Arguments: none
-Returns:   nothing (aborts if malloc() fails)
+Returns:   nothing (aborts if realloc() fails)
 */
 
 static void
 expand_input_buffers(void)
 {
 size_t new_pbuffer8_size = 2*pbuffer8_size;
-uint8_t *new_buffer = (uint8_t *)malloc(new_pbuffer8_size);
-uint8_t *new_pbuffer8 = (uint8_t *)malloc(new_pbuffer8_size);
+uint8_t *new_buffer = (uint8_t *)realloc(buffer, new_pbuffer8_size);
+uint8_t *new_pbuffer8 = (uint8_t *)realloc(pbuffer8, new_pbuffer8_size);
 
 if (new_buffer == NULL || new_pbuffer8 == NULL)
   {
-  fprintf(stderr, "pcre2test: malloc(%" SIZ_FORM ") failed\n",
+  fprintf(stderr, "pcre2test: realloc(%" SIZ_FORM ") failed\n",
           new_pbuffer8_size);
+  free(buffer);
+  free(pbuffer8);
   exit(1);
   }
 
-memcpy(new_buffer, buffer, pbuffer8_size);
-memcpy(new_pbuffer8, pbuffer8, pbuffer8_size);
-
 pbuffer8_size = new_pbuffer8_size;
-
-free(buffer);
-free(pbuffer8);
 
 buffer = new_buffer;
 pbuffer8 = new_pbuffer8;
