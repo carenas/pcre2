@@ -149,7 +149,9 @@ switch (what)
     {
     const char *v = PRIV(jit_get_target)();
     return (int)(1 + ((where == NULL)?
-      strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
+      strlen(v) :
+      PRIV(stracpy_c8)((PCRE2_UCHAR *)where, v,
+        PCRE2_JITTARGET_MAX_BUFFSIZE)));
     }
 #else
   return PCRE2_ERROR_BADOPTION;
@@ -198,8 +200,10 @@ switch (what)
     const char *v = "Unicode not supported";
 #endif
     return (int)(1 + ((where == NULL)?
-      strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
-   }
+      strlen(v) :
+       PRIV(stracpy_c8)((PCRE2_UCHAR *)where, v,
+         PCRE2_VERSION_MAX_BUFFSIZE)));
+    }
   break;
 
   case PCRE2_CONFIG_UNICODE:
@@ -235,7 +239,9 @@ switch (what)
       XSTRING(PCRE2_MAJOR.PCRE2_MINOR PCRE2_DATE) :
       XSTRING(PCRE2_MAJOR.PCRE2_MINOR) XSTRING(PCRE2_PRERELEASE PCRE2_DATE);
     return (int)(1 + ((where == NULL)?
-      strlen(v) : PRIV(strcpy_c8)((PCRE2_UCHAR *)where, v)));
+      strlen(v) :
+      PRIV(stracpy_c8)((PCRE2_UCHAR *)where, v,
+        PCRE2_VERSION_MAX_BUFFSIZE)));
     }
   }
 

@@ -221,7 +221,6 @@ claim to be C99 don't support it (hence DISABLE_PERCENT_ZT). */
 #define PARENS_NEST_DEFAULT 220   /* Default parentheses nest limit */
 #define PATSTACKSIZE 20           /* Pattern stack for save/restore testing */
 #define REPLACE_MODSIZE 100       /* Field for reading 8-bit replacement */
-#define VERSION_SIZE 64           /* Size of buffer for the version strings */
 
 /* Default JIT compile options */
 
@@ -1057,9 +1056,9 @@ static uint32_t maxcapcount;
 
 static uint16_t local_newline_default = 0;
 
-static VERSION_TYPE jittarget[VERSION_SIZE];
-static VERSION_TYPE version[VERSION_SIZE];
-static VERSION_TYPE uversion[VERSION_SIZE];
+static VERSION_TYPE jittarget[PCRE2_JITTARGET_MAX_BUFFSIZE];
+static VERSION_TYPE version[PCRE2_VERSION_MAX_BUFFSIZE];
+static VERSION_TYPE uversion[PCRE2_VERSION_MAX_BUFFSIZE];
 
 static patctl def_patctl;
 static patctl pat_patctl;

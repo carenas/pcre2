@@ -241,6 +241,11 @@ Unicode doesn't go beyond 0x0010ffff. */
 
 #define MAX_UTF_CODE_POINT 0x10ffff
 
+/* Maximum size for buffers documented in pcre2api.3 */
+
+#define PCRE2_VERSION_MAX_BUFFSIZE	24	/* library and unicode */
+#define PCRE2_JITTARGET_MAX_BUFFSIZE	64	/* sljit's target arch */
+
 /* Compile-time positive error numbers (all except UTF errors, which are
 negative) start at this value. It should probably never be changed, in case
 some application is checking for specific numbers. There is a copy of this
@@ -2340,7 +2345,7 @@ is available. */
 #define _pcre2_script_run            PCRE2_SUFFIX(_pcre2_script_run_)
 #define _pcre2_strcmp                PCRE2_SUFFIX(_pcre2_strcmp_)
 #define _pcre2_strcmp_c8             PCRE2_SUFFIX(_pcre2_strcmp_c8_)
-#define _pcre2_strcpy_c8             PCRE2_SUFFIX(_pcre2_strcpy_c8_)
+#define _pcre2_stracpy_c8            PCRE2_SUFFIX(_pcre2_stracpy_c8_)
 #define _pcre2_strlen                PCRE2_SUFFIX(_pcre2_strlen_)
 #define _pcre2_strncmp               PCRE2_SUFFIX(_pcre2_strncmp_)
 #define _pcre2_strncmp_c8            PCRE2_SUFFIX(_pcre2_strncmp_c8_)
@@ -2369,7 +2374,7 @@ extern unsigned int _pcre2_ord2utf(uint32_t, PCRE2_UCHAR *);
 extern BOOL         _pcre2_script_run(PCRE2_SPTR, PCRE2_SPTR, BOOL);
 extern int          _pcre2_strcmp(PCRE2_SPTR, PCRE2_SPTR);
 extern int          _pcre2_strcmp_c8(PCRE2_SPTR, const char *);
-extern PCRE2_SIZE   _pcre2_strcpy_c8(PCRE2_UCHAR *, const char *);
+extern PCRE2_SIZE   _pcre2_stracpy_c8(PCRE2_UCHAR *, const char *, PCRE2_SIZE);
 extern PCRE2_SIZE   _pcre2_strlen(PCRE2_SPTR);
 extern int          _pcre2_strncmp(PCRE2_SPTR, PCRE2_SPTR, size_t);
 extern int          _pcre2_strncmp_c8(PCRE2_SPTR, const char *, size_t);

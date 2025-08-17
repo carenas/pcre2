@@ -219,17 +219,22 @@ return c;
 /* Arguments:
   str1     buffer to receive the string
   str2     8-bit string to be copied
+  len      size of str1 in code units
 
 Returns:   the number of code units used (excluding trailing zero)
+           or aborts (in debug mode) if the buffer was overflowed.
 */
 
 PCRE2_SIZE
-PRIV(strcpy_c8)(PCRE2_UCHAR *str1, const char *str2)
+PRIV(stracpy_c8)(PCRE2_UCHAR *str1, const char *str2, PCRE2_SIZE len)
 {
+ptrdiff_t d;
 PCRE2_UCHAR *t = str1;
 while (*str2 != 0) *t++ = *str2++;
 *t = 0;
-return t - str1;
+d = t - str1;
+PCRE2_ASSERT(d < (ptrdiff_t)len && d < INT_MAX - 1);
+return d;
 }
 
 /* End of pcre2_string_utils.c */

@@ -1228,11 +1228,11 @@ static int regression_tests(void)
 #endif
 
 #if defined SUPPORT_PCRE2_8
-	PCRE2_UCHAR8 cpu_info[128];
+	PCRE2_UCHAR8 cpu_info[64];
 #elif defined SUPPORT_PCRE2_16
-	PCRE2_UCHAR16 cpu_info[128];
+	PCRE2_UCHAR16 cpu_info[64];
 #elif defined SUPPORT_PCRE2_32
-	PCRE2_UCHAR32 cpu_info[128];
+	PCRE2_UCHAR32 cpu_info[64];
 #endif
 #if defined SUPPORT_UNICODE && ((defined(SUPPORT_PCRE2_8) + defined(SUPPORT_PCRE2_16) + defined(SUPPORT_PCRE2_32)) >= 2)
 	int return_value;
@@ -1266,6 +1266,7 @@ static int regression_tests(void)
 
 	if (!utf)
 		disabled_options |= PCRE2_UTF;
+
 #ifdef SUPPORT_PCRE2_8
 	printf("  in  8 bit mode with UTF-8  %s:\n", utf ? "enabled" : "disabled");
 #endif
