@@ -133,7 +133,7 @@ return (pcre2_jit_stack *)arg;
 
 
 /*************************************************
-*    Find length of 0-terminated 16-bit string   *
+*    Find length of 0-terminated PCRE2 string    *
 *************************************************/
 
 static size_t pcre2_strlen(PCRE2_SPTR p)
