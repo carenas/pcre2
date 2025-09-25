@@ -77,6 +77,7 @@ library. */
 #define check_modifier                    PCRE2_SUFFIX(check_modifier_)
 #define decode_modifiers                  PCRE2_SUFFIX(decode_modifiers_)
 #define pattern_info                      PCRE2_SUFFIX(pattern_info_)
+#define maybe_show_info                   PCRE2_SUFFIX(maybe_show_info_)
 #define show_memory_info                  PCRE2_SUFFIX(show_memory_info_)
 #define show_framesize                    PCRE2_SUFFIX(show_framesize_)
 #define show_heapframes_size              PCRE2_SUFFIX(show_heapframes_size_)
@@ -1595,7 +1596,15 @@ fprintf(outfile, "%s failed: error %d: ", msg, rc);
 return print_error_message(rc, "", "\n");
 }
 
+/* Helper to show additional pattern info */
 
+static inline int
+maybe_show_info(void)
+{
+if ((pat_patctl.control & CTL_MEMORY) != 0) show_memory_info();
+if ((pat_patctl.control2 & CTL2_FRAMESIZE) != 0) show_framesize();
+return show_pattern_info();
+}
 
 /*************************************************
 *               Process command line             *
@@ -1735,9 +1744,7 @@ switch(cmd)
     jitrc = pcre2_jit_compile(compiled_code, pat_patctl.jit);
     }
 
-  if ((pat_patctl.control & CTL_MEMORY) != 0) show_memory_info();
-  if ((pat_patctl.control2 & CTL2_FRAMESIZE) != 0) show_framesize();
-  rc = show_pattern_info();
+  rc = maybe_show_info();
   if (rc != PR_OK) return rc;
   break;
 
@@ -2884,9 +2891,7 @@ if ((pat_patctl.control2 & CTL2_NL_SET) != 0)
 
 /* Output code size and other information if requested. */
 
-if ((pat_patctl.control & CTL_MEMORY) != 0) show_memory_info();
-if ((pat_patctl.control2 & CTL2_FRAMESIZE) != 0) show_framesize();
-rc = show_pattern_info();
+rc = maybe_show_info();
 if (rc != PR_OK) return rc;
 
 /* The "push" control requests that the compiled pattern be remembered on a
@@ -5523,6 +5528,7 @@ if (failure != NULL)
 #undef check_modifier
 #undef decode_modifiers
 #undef pattern_info
+#undef maybe_show_info
 #undef show_memory_info
 #undef show_framesize
 #undef show_heapframes_size
