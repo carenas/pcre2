@@ -101,6 +101,9 @@ int_char ic;
 SLJIT_UNUSED_ARG(offs1);
 SLJIT_UNUSED_ARG(offs2);
 
+if (*str_ptr >= str_end)
+  return NULL;
+
 ic.x = (int)chars;  /* Cast is OK as chars come from an int_char in the first place. */
 
 #if defined(FFCS)
@@ -193,8 +196,6 @@ restart:;
 #endif
 
 #if defined(FFCPS)
-if (*str_ptr >= str_end)
-  return NULL;
 sljit_u8 *p1 = *str_ptr - diff;
 #endif
 sljit_s32 align_offset = ((uint64_t)*str_ptr & 0xf);
