@@ -228,7 +228,14 @@ switch (step)
   }
 }
 
+/* The AVX2 code path is currently disabled.
 #define JIT_HAS_FAST_FORWARD_CHAR_SIMD (sljit_has_cpu_feature(SLJIT_HAS_SIMD))
+*/
+#if defined(SLJIT_CONFIG_X86_64) && SLJIT_CONFIG_X86_64
+#define JIT_HAS_FAST_FORWARD_CHAR_SIMD 1
+#else
+#define JIT_HAS_FAST_FORWARD_CHAR_SIMD (sljit_has_cpu_feature(SLJIT_HAS_FPU))
+#endif
 
 static void fast_forward_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2, sljit_s32 offset)
 {
@@ -365,7 +372,14 @@ if (common->utf && offset > 0)
 #endif
 }
 
+/* The AVX2 code path is currently disabled.
 #define JIT_HAS_FAST_REQUESTED_CHAR_SIMD (sljit_has_cpu_feature(SLJIT_HAS_SIMD))
+*/
+#if defined(SLJIT_CONFIG_X86_64) && SLJIT_CONFIG_X86_64
+#define JIT_HAS_FAST_REQUESTED_CHAR_SIMD 1
+#else
+#define JIT_HAS_FAST_REQUESTED_CHAR_SIMD (sljit_has_cpu_feature(SLJIT_HAS_FPU))
+#endif
 
 static jump_list *fast_requested_char_simd(compiler_common *common, PCRE2_UCHAR char1, PCRE2_UCHAR char2)
 {
@@ -471,7 +485,14 @@ return not_found;
 
 #ifndef _WIN64
 
+/* The AVX2 code path is currently disabled.
 #define JIT_HAS_FAST_FORWARD_CHAR_PAIR_SIMD (sljit_has_cpu_feature(SLJIT_HAS_SIMD))
+*/
+#if defined(SLJIT_CONFIG_X86_64) && SLJIT_CONFIG_X86_64
+#define JIT_HAS_FAST_FORWARD_CHAR_PAIR_SIMD 1
+#else
+#define JIT_HAS_FAST_FORWARD_CHAR_PAIR_SIMD (sljit_has_cpu_feature(SLJIT_HAS_FPU))
+#endif
 
 static void fast_forward_char_pair_simd(compiler_common *common, sljit_s32 offs1,
   PCRE2_UCHAR char1a, PCRE2_UCHAR char1b, sljit_s32 offs2, PCRE2_UCHAR char2a, PCRE2_UCHAR char2b)
