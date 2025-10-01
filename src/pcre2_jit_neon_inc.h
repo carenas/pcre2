@@ -82,6 +82,17 @@ POSSIBILITY OF SUCH DAMAGE.
 #  endif
 # endif
 
+/* WARNING
+The generated function uses a 5 argument call which is not supported by
+SLJIT and that just happens to work with the aarch64 ABI (with R5 as the
+fifth argument).
+
+The fifth argument contains packed characters in a 64bit integer and is
+therefore not wide enough for full width characters in the 16-bit or
+32-bit library, specially for calls that require up to 4 characters to
+be provided.
+*/
+
 #if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeclaration-after-statement"

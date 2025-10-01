@@ -100,7 +100,7 @@ return CMP(SLJIT_NOT_EQUAL, reg, 0, SLJIT_IMM, 0xdc00);
 }
 #endif
 
-#endif /* SLJIT_CONFIG_X86 || SLJIT_CONFIG_S390X */
+#endif /* SLJIT_CONFIG_X86 || SLJIT_CONFIG_S390X || SLJIT_CONFIG_LOONGARCH_64 */
 
 #if (defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86)
 
@@ -246,10 +246,10 @@ struct sljit_jump *quit;
 struct sljit_jump *partial_quit[2];
 vector_compare_type compare_type = vector_compare_match1;
 sljit_s32 tmp1_reg_ind = sljit_get_register_index(SLJIT_GP_REGISTER, TMP1);
-sljit_s32 data_ind = sljit_get_register_index(SLJIT_SIMD_REG_128, SLJIT_VR0);
-sljit_s32 cmp1_ind = sljit_get_register_index(SLJIT_SIMD_REG_128, SLJIT_VR1);
-sljit_s32 cmp2_ind = sljit_get_register_index(SLJIT_SIMD_REG_128, SLJIT_VR2);
-sljit_s32 tmp_ind = sljit_get_register_index(SLJIT_SIMD_REG_128, SLJIT_VR3);
+sljit_s32 data_ind = sljit_get_register_index(reg_type, SLJIT_VR0);
+sljit_s32 cmp1_ind = sljit_get_register_index(reg_type, SLJIT_VR1);
+sljit_s32 cmp2_ind = sljit_get_register_index(reg_type, SLJIT_VR2);
+sljit_s32 tmp_ind = sljit_get_register_index(reg_type, SLJIT_VR3);
 sljit_u32 bit = 0;
 int i;
 
@@ -380,10 +380,10 @@ struct sljit_jump *quit;
 jump_list *not_found = NULL;
 vector_compare_type compare_type = vector_compare_match1;
 sljit_s32 tmp1_reg_ind = sljit_get_register_index(SLJIT_GP_REGISTER, TMP1);
-sljit_s32 data_ind = sljit_get_register_index(SLJIT_SIMD_REG_128, SLJIT_VR0);
-sljit_s32 cmp1_ind = sljit_get_register_index(SLJIT_SIMD_REG_128, SLJIT_VR1);
-sljit_s32 cmp2_ind = sljit_get_register_index(SLJIT_SIMD_REG_128, SLJIT_VR2);
-sljit_s32 tmp_ind = sljit_get_register_index(SLJIT_SIMD_REG_128, SLJIT_VR3);
+sljit_s32 data_ind = sljit_get_register_index(reg_type, SLJIT_VR0);
+sljit_s32 cmp1_ind = sljit_get_register_index(reg_type, SLJIT_VR1);
+sljit_s32 cmp2_ind = sljit_get_register_index(reg_type, SLJIT_VR2);
+sljit_s32 tmp_ind = sljit_get_register_index(reg_type, SLJIT_VR3);
 sljit_u32 bit = 0;
 int i;
 
@@ -488,14 +488,14 @@ sljit_u32 bit1 = 0;
 sljit_u32 bit2 = 0;
 sljit_u32 diff = IN_UCHARS(offs1 - offs2);
 sljit_s32 tmp1_reg_ind = sljit_get_register_index(SLJIT_GP_REGISTER, TMP1);
-sljit_s32 data1_ind = sljit_get_register_index(SLJIT_SIMD_REG_128, SLJIT_VR0);
-sljit_s32 data2_ind = sljit_get_register_index(SLJIT_SIMD_REG_128, SLJIT_VR1);
-sljit_s32 cmp1a_ind = sljit_get_register_index(SLJIT_SIMD_REG_128, SLJIT_VR2);
-sljit_s32 cmp2a_ind = sljit_get_register_index(SLJIT_SIMD_REG_128, SLJIT_VR3);
-sljit_s32 cmp1b_ind = sljit_get_register_index(SLJIT_SIMD_REG_128, SLJIT_VR4);
-sljit_s32 cmp2b_ind = sljit_get_register_index(SLJIT_SIMD_REG_128, SLJIT_VR5);
-sljit_s32 tmp1_ind = sljit_get_register_index(SLJIT_SIMD_REG_128, SLJIT_VR6);
-sljit_s32 tmp2_ind = sljit_get_register_index(SLJIT_SIMD_REG_128, SLJIT_TMP_DEST_VREG);
+sljit_s32 data1_ind = sljit_get_register_index(reg_type, SLJIT_VR0);
+sljit_s32 data2_ind = sljit_get_register_index(reg_type, SLJIT_VR1);
+sljit_s32 cmp1a_ind = sljit_get_register_index(reg_type, SLJIT_VR2);
+sljit_s32 cmp2a_ind = sljit_get_register_index(reg_type, SLJIT_VR3);
+sljit_s32 cmp1b_ind = sljit_get_register_index(reg_type, SLJIT_VR4);
+sljit_s32 cmp2b_ind = sljit_get_register_index(reg_type, SLJIT_VR5);
+sljit_s32 tmp1_ind = sljit_get_register_index(reg_type, SLJIT_VR6);
+sljit_s32 tmp2_ind = sljit_get_register_index(reg_type, SLJIT_TMP_DEST_VREG);
 struct sljit_label *start;
 #if defined SUPPORT_UNICODE && PCRE2_CODE_UNIT_WIDTH != 32
 struct sljit_label *restart;
@@ -1043,7 +1043,7 @@ OP1(SLJIT_MOV, SLJIT_MEM1(SLJIT_SP), LOCAL0, STR_PTR, 0);
 
 /* Prepare arguments for the function call. */
 if (common->match_end_ptr == 0)
-   OP1(SLJIT_MOV, SLJIT_R0, 0, STR_END, 0);
+  OP1(SLJIT_MOV, SLJIT_R0, 0, STR_END, 0);
 else
   {
   OP1(SLJIT_MOV, SLJIT_R0, 0, SLJIT_MEM1(SLJIT_SP), common->match_end_ptr);
