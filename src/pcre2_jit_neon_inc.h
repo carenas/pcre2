@@ -112,7 +112,10 @@ int_char ic;
 SLJIT_UNUSED_ARG(offs1);
 SLJIT_UNUSED_ARG(offs2);
 
-ic.x = (int)chars;  /* Cast is OK as chars come from an int_char in the first place. */
+if (*str_ptr >= str_end)
+  return NULL;
+
+ic.x = (int)chars;  /* Cast is "OK" as chars come from an int_char. */
 
 #if defined(FFCS)
 sljit_u8 c1 = ic.c.c1;
@@ -193,6 +196,9 @@ else
 # endif
 
 *str_ptr += IN_UCHARS(offs1);
+
+if (*str_ptr >= str_end)
+  return NULL;
 #endif
 
 #if PCRE2_CODE_UNIT_WIDTH != 8
