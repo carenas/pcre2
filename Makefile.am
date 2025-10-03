@@ -327,9 +327,9 @@ src/pcre2.h.generic: src/pcre2.h.in configure.ac
 # running configure in a new directory, it complains. For this reason, we move
 # config.status out of the way while doing the default configuration. The
 # resulting config.h is munged by perl to put #ifdefs round any #defines for
-# macros with values, and to #undef all boolean macros such as HAVE_xxx,
-# SUPPORT_xxx, and PCRE2_STATIC/PCRE2POSIX_SHARED. We also get rid of any
-# GCC-specific visibility settings.
+# macros with values, #undef all boolean macros such as HAVE_xxx, SUPPORT_xxx,
+# or PCRE2_STATIC/PCRE2POSIX_SHARED and set to 1 any boolean macros such as
+# ENABLE_xxx. We also get rid of any GCC-specific visibility settings.
 
 src/config.h.generic: configure.ac
 	rm -rf $@ _generic
@@ -343,6 +343,7 @@ src/config.h.generic: configure.ac
 		-e 'if(/(.+?)\s*__attribute__ \(\(visibility/){print"$$1\n";$$blank=0;next;}' \
 		-e 'if(/LT_OBJDIR/){print"/* This is ignored unless you are using libtool. */\n";}' \
 		-e 'if(/^#define\s((?:HAVE|SUPPORT|STDC)_\w+|PCRE2_STATIC|PCRE2POSIX_SHARED)/){print"/* #undef $$1 */\n";$$blank=0;next;}' \
+		-e 'if(/^#define\s((?:ENABLE)_\w+)/){print"#define $$1 1\n";$$blank=0;next;}' \
 		-e 'if(/^#define\s(?!PACKAGE|VERSION)(\w+)/){print"#ifndef $$1\n$$_#endif\n";$$blank=0;next;}' \
 		-e 'if(/^\s*$$/){print unless $$blank; $$blank=1;} else{print;$$blank=0;}' \
 		_generic/src/config.h >$@

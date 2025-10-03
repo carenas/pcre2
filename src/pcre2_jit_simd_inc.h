@@ -39,7 +39,7 @@ POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------------
 */
 
-#if !(defined SUPPORT_VALGRIND)
+#if defined(ENABLE_JIT_SIMD) && !defined(SUPPORT_VALGRIND)
 
 #if ((defined SLJIT_CONFIG_X86 && SLJIT_CONFIG_X86) \
      || (defined SLJIT_CONFIG_ARM_64 && SLJIT_CONFIG_ARM_64) \
@@ -2503,4 +2503,4 @@ if (common->match_end_ptr != 0)
 
 #endif /* SLJIT_CONFIG_LOONGARCH_64 */
 
-#endif /* !SUPPORT_VALGRIND */
+#endif /* ENABLE_JIT_SIMD && !SUPPORT_VALGRIND */

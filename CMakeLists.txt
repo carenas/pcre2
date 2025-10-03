@@ -104,6 +104,7 @@
 # 2023-08-06 PH added support for setting variable length lookbehind maximum
 # 2025-03-27 Theodore used standard CMake constructs to export the library's
 #            targets.
+# 2025-10-02 Carlo add PCRE2_ENABLE_JIT_SIMD
 
 ################################################################################
 # We have used `gersemi` for auto-formatting our CMake files.
@@ -159,6 +160,7 @@ include(CheckFunctionExists)
 include(CheckSymbolExists)
 include(CheckIncludeFile)
 include(CheckTypeSize)
+include(CMakeDependentOption)
 include(CMakePackageConfigHelpers)
 include(CMakePushCheckState)
 include(GNUInstallDirs) # for CMAKE_INSTALL_LIBDIR
@@ -387,6 +389,8 @@ mark_as_advanced(PCRE2_HEAP_MATCH_RECURSE)
 
 set(PCRE2_SUPPORT_JIT OFF CACHE BOOL "Enable support for Just-in-time compiling.")
 
+cmake_dependent_option(PCRE2_ENABLE_JIT_SIMD "Enable JIT's SIMD optimization." ON PCRE2_SUPPORT_JIT OFF)
+
 if(${CMAKE_SYSTEM_NAME} MATCHES Linux|NetBSD)
   set(PCRE2_SUPPORT_JIT_SEALLOC OFF CACHE BOOL "Enable SELinux compatible execmem allocator in JIT (experimental).")
 else()
@@ -576,6 +580,8 @@ if(PCRE2_SUPPORT_JIT)
     endif()
   endif()
 endif()
+
+set(ENABLE_JIT_SIMD PCRE2_ENABLE_JIT_SIMD)
 
 if(PCRE2_SUPPORT_JIT_SEALLOC)
   set(SLJIT_PROT_EXECUTABLE_ALLOCATOR 1)
@@ -1536,6 +1542,7 @@ if(PCRE2_SHOW_REPORT)
   message(STATUS "  Build 32 bit pcre2 library ........ : ${PCRE2_BUILD_PCRE2_32}")
   message(STATUS "  Include debugging code ............ : ${PCRE2_DEBUG}")
   message(STATUS "  Enable JIT compiling support ...... : ${PCRE2_SUPPORT_JIT}")
+  message(STATUS "      with SIMD optimization......... : ${PCRE2_ENABLE_JIT_SIMD}")
   message(STATUS "  Use SELinux allocator in JIT ...... : ${PCRE2_SUPPORT_JIT_SEALLOC}")
   message(STATUS "  Enable Unicode support ............ : ${PCRE2_SUPPORT_UNICODE}")
   message(STATUS "  Newline char/sequence ............. : ${PCRE2_NEWLINE}")

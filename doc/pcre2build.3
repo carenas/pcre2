@@ -176,8 +176,21 @@ If in doubt, use
 .sp
 which enables JIT only if the current hardware is supported. You can check
 if JIT is enabled in the configuration summary that is output at the end of a
-\fBconfigure\fP run. If you are enabling JIT under SELinux you may also want to
-add
+\fBconfigure\fP run.
+.sp
+PCRE2 uses your CPU's SIMD instructions to optimize some of its matches when
+JIT is enabled. You can disable that optimization by invoking configure with
+
+  --disable-jit-simd
+.sp
+option. Most of the times this is unnecessary, as SLJIT tries to detect at
+runtime if support is available, but that code might be disabled for old
+CPUs like 486 or zEC12, which then will trigger failures. This option has
+no effect if JIT is not enabled.
+.sp
+ If you are enabling JIT under SELinux and your application doesn't call
+fork() and there is no better way to allow executable pages, you could also
+use the experimental
 .sp
   --enable-jit-sealloc
 .sp
