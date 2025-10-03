@@ -53,6 +53,9 @@ surrounded by #ifndef/#endif lines so that the value can be overridden by -D. */
    LF does in an ASCII/Unicode environment. */
 /* #undef EBCDIC_NL25 */
 
+/* Define tp 1 tp use JIT's SIMD optimization. */
+#define ENABLE_JIT_SIMD 1
+
 /* Define to 1 if you have the <assert.h> header file. */
 /* #undef HAVE_ASSERT_H */
 

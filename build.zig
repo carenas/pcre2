@@ -36,6 +36,7 @@ pub fn build(b: *std.Build) !void {
             .SUPPORT_PCRE2_32 = codeUnitWidth == CodeUnitWidth.@"32",
             .SUPPORT_UNICODE = true,
             .SUPPORT_JIT = jit,
+            .ENABLE_JIT_SIMD = true,
 
             .PCRE2_EXPORT = null,
             .PCRE2_LINK_SIZE = 2,

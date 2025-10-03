@@ -245,6 +245,13 @@ if test "$enable_jit" = "auto"; then
   echo checking for JIT support on this hardware... $enable_jit
 fi
 
+# Handle --disable-jit-simd (enabled by default)
+AC_ARG_ENABLE(jit-simd,
+  AS_HELP_STRING([--disable-jit-simd],
+                 [disable SIMD optimization for JIT]
+  ),,enable_jit_simd=yes
+)
+
 # Handle --enable-jit-sealloc (disabled by default and only experimental)
 case $host_os in
   linux* | netbsd*)
@@ -787,6 +794,12 @@ if test "$enable_jit_sealloc" = "yes"; then
     will have no effect unless SUPPORT_JIT is also defined.])
 fi
 
+AS_IF([test "x$enable_jit_simd" = "xyes"], [
+  AC_DEFINE([ENABLE_JIT_SIMD], [1],
+            [Define to 1 to use JIT's SIMD optimization.]
+  )
+])
+
 if test "$enable_pcre2grep_jit" = "yes"; then
   AC_DEFINE([SUPPORT_PCRE2GREP_JIT], [], [
     Define to any value to enable JIT support in pcre2grep. Note that this will
@@ -1254,6 +1267,7 @@ $PACKAGE-$VERSION configuration summary:
     Build 32-bit pcre2 library ......... : ${enable_pcre2_32}
     Include debugging code ............. : ${enable_debug}
     Enable JIT compiling support ....... : ${enable_jit}
+        with SIMD optimization ......... : ${enable_jit_simd}
     Use SELinux allocator in JIT ....... : ${enable_jit_sealloc}
     Enable Unicode support ............. : ${enable_unicode}
     Newline char/sequence .............. : ${enable_newline}
